@@ -11,13 +11,13 @@ import (
 )
 
 func main() {
-	c := builder.New("test", "v1.0.0", "acme.org")
+	cmp := builder.New("test", "v1.0.0", "acme.org")
 
-	x := file.New("data", "config.yaml")
+	resource := file.New("data", "config.yaml")
 
-	c = mutate.AddResources(c, x)
+	cmp = mutate.AddResources(cmp, resource)
 
-	signables, err := c.Resources()
+	signables, err := cmp.Resources()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,9 +27,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	c = mutate.AddSignatures(c, sig)
+	cmp = mutate.AddSignatures(cmp, sig)
 
-	if err := bundle.Write("./component-bundle", c); err != nil {
+	if err := bundle.Write("./component-bundle", cmp); err != nil {
 		log.Fatal(err)
 	}
 }
