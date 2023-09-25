@@ -40,6 +40,10 @@ func (c *component) Descriptor() (*v2.Descriptor, error) {
 	}, nil
 }
 
+func (c *component) StorageContext() ([]v2.StorageContext, error) {
+	return nil, nil
+}
+
 func (c *component) Resources() ([]v2.Resource, error) {
 	return nil, nil
 }

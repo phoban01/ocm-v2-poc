@@ -8,10 +8,3 @@ func AddResources(base v2.Component, resources ...v2.Resource) v2.Component {
 		addResources: resources,
 	}
 }
-
-func AddSignatures(base v2.Component, signatures ...v2.Signature) v2.Component {
-	return &component{
-		base:          base,
-		addSignatures: signatures,
-	}
-}

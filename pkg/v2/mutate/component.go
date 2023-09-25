@@ -10,12 +10,14 @@ type component struct {
 	base          v2.Component
 	addResources  []v2.Resource
 	addSignatures []v2.Signature
+	addStorage    []v2.Storage
 
-	version    string
-	computed   bool
-	resources  []v2.Resource
-	signatures []v2.Signature
-	descriptor *v2.Descriptor
+	version        string
+	computed       bool
+	resources      []v2.Resource
+	signatures     []v2.Signature
+	storageContext []v2.StorageContext
+	descriptor     *v2.Descriptor
 
 	sync.Mutex
 }
@@ -52,6 +54,17 @@ func (c *component) compute() error {
 
 	c.signatures = sigs
 
+	sctx, err := c.base.StorageContext()
+	if err != nil {
+		return err
+	}
+
+	for _, add := range c.addStorage {
+		sctx = append(sctx, *add.Context())
+	}
+
+	c.storageContext = sctx
+
 	od, err := c.base.Descriptor()
 	if err != nil {
 		return err
@@ -60,7 +73,10 @@ func (c *component) compute() error {
 	c.descriptor = od
 
 	c.descriptor.Resources = c.resources
+
 	c.descriptor.Signatures = c.signatures
+
+	c.descriptor.StorageContext = c.storageContext
 
 	return nil
 }
@@ -74,6 +90,13 @@ func (c *component) Version() string {
 
 func (c *component) Provider() (*v2.Provider, error) {
 	return c.base.Provider()
+}
+
+func (c *component) StorageContext() ([]v2.StorageContext, error) {
+	if err := c.compute(); err != nil {
+		return nil, err
+	}
+	return c.storageContext, nil
 }
 
 func (c *component) Descriptor() (*v2.Descriptor, error) {
@@ -99,5 +122,8 @@ func (c *component) References() ([]v2.Reference, error) {
 }
 
 func (c *component) Signatures() ([]v2.Signature, error) {
-	return c.base.Signatures()
+	if err := c.compute(); err != nil {
+		return nil, err
+	}
+	return c.signatures, nil
 }

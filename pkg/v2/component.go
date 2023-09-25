@@ -4,6 +4,9 @@ type Component interface {
 	// Version returns the version string of the component.
 	Version() string
 
+	// Version returns the version string of the component.
+	StorageContext() ([]StorageContext, error)
+
 	// Provider returns the Provider metadata for te Component.
 	Provider() (*Provider, error)
 
