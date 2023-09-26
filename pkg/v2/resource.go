@@ -11,6 +11,8 @@ type Resource interface {
 
 	Blob() (io.ReadCloser, error)
 
+	Access() string
+
 	Digest() (string, error)
 
 	ResourceType() types.ResourceType
@@ -18,4 +20,6 @@ type Resource interface {
 	MediaType() types.MediaType
 
 	Labels() map[string]string
+
+	Deferrable() bool
 }

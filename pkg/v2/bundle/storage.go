@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
+	"github.com/phoban01/ocm-v2/pkg/v2/mutate"
 )
 
 type storage struct {
@@ -51,23 +52,34 @@ func (s *storage) Write(component v2.Component) error {
 	}
 
 	for _, r := range resources {
+		if r.Deferrable() {
+			continue
+		}
+
 		dig, err := r.Digest()
 		if err != nil {
 			return err
 		}
-		f, err := os.Create(filepath.Join(blobdir, dig))
+
+		p := filepath.Join(blobdir, dig)
+		f, err := os.Create(p)
 		if err != nil {
 			return err
 		}
 		defer f.Close()
+
 		reader, err := r.Blob()
 		if err != nil {
 			return err
 		}
+
 		defer reader.Close()
 		if _, err := io.Copy(f, reader); err != nil {
 			return err
 		}
+
+		r = mutate.SetAccess(r, p)
+		component = mutate.ReplaceResource(component, r)
 	}
 
 	desc, err := component.Descriptor()

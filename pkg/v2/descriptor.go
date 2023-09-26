@@ -48,10 +48,11 @@ func init() {
 }
 
 type resource struct {
-	Metadata     `       json:",inline"`
+	Metadata     `json:",inline"`
 	Digest       string `json:"digest"`
 	MediaType    string `json:"media_type"`
 	ResourceType string `json:"resource_type"`
+	Access       string `json:"access"`
 }
 
 type signature struct {
@@ -93,6 +94,7 @@ func serialize(d *Descriptor) (*serializationFormat, error) {
 			ResourceType: string(r.ResourceType()),
 			MediaType:    string(r.MediaType()),
 			Digest:       dig,
+			Access:       r.Access(),
 		}
 		sf.Resources = append(sf.Resources, rx)
 	}

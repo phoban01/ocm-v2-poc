@@ -4,6 +4,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/hex"
 	"encoding/pem"
@@ -55,19 +56,16 @@ func (s sig) sign() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		digest += d
+		digest += d + "\n"
 	}
 
 	if digest == "" {
 		return "", errors.New("no digest provided")
 	}
 
-	hashed, err := hex.DecodeString(digest)
-	if err != nil {
-		return "", err
-	}
+	hashed := sha256.Sum256([]byte(digest))
 
-	signature, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, hashed)
+	signature, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, hashed[:])
 	if err != nil {
 		return "", err
 	}

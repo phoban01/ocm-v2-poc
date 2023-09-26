@@ -17,7 +17,7 @@ type file struct {
 
 var _ v2.Resource = (*file)(nil)
 
-func New(name, path string) v2.Resource {
+func Resource(name, path string) v2.Resource {
 	return &file{name: name, path: path}
 }
 
@@ -25,20 +25,28 @@ func (f *file) Name() string {
 	return f.name
 }
 
+func (f *file) Access() string {
+	return f.path
+}
+
+func (f *file) Deferrable() bool {
+	return false
+}
+
 func (f *file) Blob() (io.ReadCloser, error) {
-	return os.Open(f.path)
+	return os.Open(f.Access())
 }
 
 func (f *file) Digest() (string, error) {
-	file, err := os.Open(f.path)
+	data, err := f.Blob()
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer data.Close()
 
 	hash := sha256.New()
 
-	_, err = io.Copy(hash, file)
+	_, err = io.Copy(hash, data)
 	if err != nil {
 		return "", err
 	}

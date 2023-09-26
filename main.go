@@ -4,21 +4,25 @@ import (
 	"log"
 
 	"github.com/phoban01/ocm-v2/pkg/signer"
+	v2 "github.com/phoban01/ocm-v2/pkg/v2"
 	"github.com/phoban01/ocm-v2/pkg/v2/builder"
-	"github.com/phoban01/ocm-v2/pkg/v2/bundle"
 	"github.com/phoban01/ocm-v2/pkg/v2/file"
 	"github.com/phoban01/ocm-v2/pkg/v2/mutate"
+	"github.com/phoban01/ocm-v2/pkg/v2/oci"
 )
 
 func main() {
 	// create a new component
 	cmp := builder.New("ocm.software/test", "v1.0.0", "acme.org")
 
-	// create a new resource
-	resource := file.New("data", "config.yaml")
+	// create resources
+	resources := []v2.Resource{
+		file.Resource("data", "config.yaml"),
+		oci.Resource("web-server", "docker.io/nginx:1.25.2"),
+	}
 
 	// add the resource to the component
-	cmp = mutate.AddResources(cmp, resource)
+	cmp = mutate.AddResources(cmp, resources...)
 
 	// get a list of the components' resources for signing
 	signables, err := cmp.Resources()
@@ -36,7 +40,7 @@ func main() {
 	cmp = mutate.AddSignatures(cmp, sig)
 
 	// create a bundle (component archive) to store the component
-	store, err := bundle.New("./component-bundle")
+	store, err := oci.Storage("ghcr.io/phoban01")
 	if err != nil {
 		log.Fatal(err)
 	}

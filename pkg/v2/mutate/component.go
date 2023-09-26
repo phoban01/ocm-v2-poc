@@ -7,10 +7,11 @@ import (
 )
 
 type component struct {
-	base          v2.Component
-	addResources  []v2.Resource
-	addSignatures []v2.Signature
-	addStorage    []v2.Storage
+	base            v2.Component
+	addResources    []v2.Resource
+	addSignatures   []v2.Signature
+	addStorage      []v2.Storage
+	replaceResource v2.Resource
 
 	version        string
 	computed       bool
@@ -39,6 +40,23 @@ func (c *component) compute() error {
 
 	for _, add := range c.addResources {
 		res = append(res, add)
+	}
+
+	if c.replaceResource != nil {
+		rr := c.replaceResource
+		for i, r := range res {
+			dig, err := r.Digest()
+			if err != nil {
+				return err
+			}
+			rdig, err := rr.Digest()
+			if err != nil {
+				return err
+			}
+			if r.Name() == rr.Name() && dig == rdig {
+				res[i] = rr
+			}
+		}
 	}
 
 	c.resources = res
