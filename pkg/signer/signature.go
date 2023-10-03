@@ -12,6 +12,7 @@ import (
 	"os"
 
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
+	"github.com/phoban01/ocm-v2/pkg/v2/types"
 )
 
 type sig struct {
@@ -38,15 +39,19 @@ func (s *sig) Name() string {
 	return s.name
 }
 
-func (s *sig) Digest() (string, error) {
+func (s *sig) Digest() (*types.Digest, error) {
 	return s.sign()
 }
 
-func (s sig) sign() (string, error) {
+func (s sig) Info() *types.SignatureInfo {
+	return nil
+}
+
+func (s sig) sign() (*types.Digest, error) {
 	block, _ := pem.Decode(s.privateKey)
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	var digest string
@@ -54,21 +59,23 @@ func (s sig) sign() (string, error) {
 	for _, r := range s.resources {
 		d, err := r.Digest()
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		digest += d + "\n"
+		digest += d.Value + "\n"
 	}
 
 	if digest == "" {
-		return "", errors.New("no digest provided")
+		return nil, errors.New("no digest provided")
 	}
 
 	hashed := sha256.Sum256([]byte(digest))
 
 	signature, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, hashed[:])
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return hex.EncodeToString(signature), nil
+	return &types.Digest{
+		Value: hex.EncodeToString(signature),
+	}, nil
 }

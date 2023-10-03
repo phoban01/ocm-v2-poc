@@ -1,26 +1,17 @@
 package mutate
 
 import (
-	"io"
-
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
 	"github.com/phoban01/ocm-v2/pkg/v2/types"
 )
 
 type resource struct {
 	base          v2.Resource
-	updatedAccess string
-	access        string
+	updatedAccess v2.Access
+	access        v2.Access
 }
 
 var _ v2.Resource = (*resource)(nil)
-
-func SetAccess(base v2.Resource, access string) v2.Resource {
-	return &resource{
-		base:          base,
-		updatedAccess: access,
-	}
-}
 
 func (r *resource) compute() error {
 	r.access = r.updatedAccess
@@ -31,31 +22,35 @@ func (r *resource) Name() string {
 	return r.base.Name()
 }
 
-func (r *resource) Access() string {
+func (r *resource) Access() v2.Access {
 	r.compute()
 	return r.access
 }
 
-func (r *resource) Blob() (io.ReadCloser, error) {
-	return r.base.Blob()
-}
-
-func (r *resource) Digest() (string, error) {
+func (r *resource) Digest() (types.Digest, error) {
 	return r.base.Digest()
 }
 
-func (r *resource) ResourceType() types.ResourceType {
-	return r.base.ResourceType()
-}
-
-func (r *resource) MediaType() types.MediaType {
-	return r.base.MediaType()
+func (r *resource) Type() types.ResourceType {
+	return r.base.Type()
 }
 
 func (r *resource) Labels() map[string]string {
 	return r.base.Labels()
 }
 
+func (r *resource) WithLocation(p string) v2.Resource {
+	return r.base.WithLocation(p)
+}
+
 func (r *resource) Deferrable() bool {
 	return r.base.Deferrable()
+}
+
+func (r *resource) MarshalJSON() ([]byte, error) {
+	return r.base.MarshalJSON()
+}
+
+func (r *resource) UnmarshalJSON(data []byte) error {
+	return r.base.UnmarshalJSON(data)
 }

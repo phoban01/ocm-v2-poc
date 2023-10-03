@@ -1,4 +1,4 @@
-package builder
+package archive
 
 import (
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
@@ -6,28 +6,15 @@ import (
 )
 
 type component struct {
-	name      string
-	version   string
-	provider  string
-	resources []v2.Resource
+	descriptor v2.Descriptor
+	resources  []v2.Resource
+	signatures []v2.Signature
 }
 
 var _ v2.Component = (*component)(nil)
 
-func New(name, version, provider string) v2.Component {
-	return &component{
-		name:     name,
-		version:  version,
-		provider: provider,
-	}
-}
-
 func (c *component) compute() error {
-	desc, err := c.Descriptor()
-	if err != nil {
-		return err
-	}
-	for _, res := range desc.Resources {
+	for _, res := range c.descriptor.Resources {
 		dr, err := decode.Resource(res)
 		if err != nil {
 			return err
@@ -38,25 +25,15 @@ func (c *component) compute() error {
 }
 
 func (c *component) Version() string {
-	return c.version
+	return c.descriptor.Version
 }
 
 func (c *component) Provider() (*v2.Provider, error) {
-	return &v2.Provider{
-		Name: c.provider,
-	}, nil
+	return &c.descriptor.Provider, nil
 }
 
 func (c *component) Descriptor() (*v2.Descriptor, error) {
-	return &v2.Descriptor{
-		Metadata: v2.Metadata{
-			Name: c.name,
-		},
-		Provider: v2.Provider{
-			Name: c.provider,
-		},
-		Version: c.version,
-	}, nil
+	return &c.descriptor, nil
 }
 
 func (c *component) RepositoryContext() ([]v2.RepositoryContext, error) {
@@ -79,5 +56,5 @@ func (c *component) References() ([]v2.Reference, error) {
 }
 
 func (c *component) Signatures() ([]v2.Signature, error) {
-	return nil, nil
+	return c.signatures, nil
 }

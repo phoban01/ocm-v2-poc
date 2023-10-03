@@ -16,24 +16,39 @@ import (
 	"github.com/phoban01/ocm-v2/pkg/v2/mutate"
 )
 
-type storage struct {
+type repository struct {
 	registry string
 }
 
-var _ v2.Storage = (*storage)(nil)
+var _ v2.Repository = (*repository)(nil)
 
-func Storage(registry string) (v2.Storage, error) {
-	return &storage{registry: registry}, nil
+func Repository(registry string) (v2.Repository, error) {
+	return &repository{registry: registry}, nil
 }
 
-func (s *storage) Context() *v2.StorageContext {
-	return &v2.StorageContext{
-		Type: "ocm.storage/oci",
+func (s *repository) Context() *v2.RepositoryContext {
+	return &v2.RepositoryContext{
+		Type: "ocm.repository/oci",
 		URL:  fmt.Sprintf("oci://%s", s.registry),
 	}
 }
 
-func (s *storage) Write(component v2.Component) error {
+func (s *repository) Get(name, version string) (v2.Component, error) {
+	return nil, nil
+}
+
+func (s *repository) List() ([]v2.Component, error) {
+	return nil, nil
+}
+
+func (s *repository) Delete() error {
+	return nil
+}
+
+func (s *repository) Write(component v2.Component) error {
+	// update the repository context
+	component = mutate.WithRepositoryContext(component, s)
+
 	desc, err := component.Descriptor()
 	if err != nil {
 		return err
@@ -49,22 +64,6 @@ func (s *storage) Write(component v2.Component) error {
 	resources, err := component.Resources()
 	if err != nil {
 		return err
-	}
-
-	for _, r := range resources {
-		if r.Deferrable() {
-			continue
-		}
-
-		dig, err := r.Digest()
-		if err != nil {
-			return err
-		}
-
-		access := fmt.Sprintf("%s@sha256:%s", url, dig)
-
-		r = mutate.SetAccess(r, access)
-		component = mutate.ReplaceResource(component, r)
 	}
 
 	desc, err = component.Descriptor()
@@ -103,7 +102,10 @@ func (s *storage) Write(component v2.Component) error {
 			continue
 		}
 
-		layer, err := tarball.LayerFromOpener(r.Blob, tarball.WithMediaType("application/tar-gzip"))
+		layer, err := tarball.LayerFromOpener(
+			r.Access().Data,
+			tarball.WithMediaType("application/tar-gzip"),
+		)
 		if err != nil {
 			return err
 		}

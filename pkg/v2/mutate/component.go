@@ -1,23 +1,24 @@
 package mutate
 
 import (
+	"encoding/json"
 	"sync"
 
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
+	"github.com/phoban01/ocm-v2/pkg/v2/types"
 )
 
 type component struct {
-	base            v2.Component
-	addResources    []v2.Resource
-	addSignatures   []v2.Signature
-	addStorage      []v2.Storage
-	replaceResource v2.Resource
+	base          v2.Component
+	addResources  []v2.Resource
+	addSignatures []v2.Signature
+	addRepository []v2.Repository
 
 	version        string
 	computed       bool
 	resources      []v2.Resource
 	signatures     []v2.Signature
-	storageContext []v2.StorageContext
+	storageContext []v2.RepositoryContext
 	descriptor     *v2.Descriptor
 
 	sync.Mutex
@@ -33,33 +34,12 @@ func (c *component) compute() error {
 		return nil
 	}
 
-	res, err := c.base.Resources()
-	if err != nil {
-		return err
-	}
-
 	for _, add := range c.addResources {
-		res = append(res, add)
+		rc := add
+		c.resources = append(c.resources, rc)
 	}
 
-	if c.replaceResource != nil {
-		rr := c.replaceResource
-		for i, r := range res {
-			dig, err := r.Digest()
-			if err != nil {
-				return err
-			}
-			rdig, err := rr.Digest()
-			if err != nil {
-				return err
-			}
-			if r.Name() == rr.Name() && dig == rdig {
-				res[i] = rr
-			}
-		}
-	}
-
-	c.resources = res
+	c.addResources = nil
 
 	sigs, err := c.base.Signatures()
 	if err != nil {
@@ -72,12 +52,12 @@ func (c *component) compute() error {
 
 	c.signatures = sigs
 
-	sctx, err := c.base.StorageContext()
+	sctx, err := c.base.RepositoryContext()
 	if err != nil {
 		return err
 	}
 
-	for _, add := range c.addStorage {
+	for _, add := range c.addRepository {
 		sctx = append(sctx, *add.Context())
 	}
 
@@ -90,11 +70,22 @@ func (c *component) compute() error {
 
 	c.descriptor = od
 
-	c.descriptor.Resources = c.resources
+	for _, r := range c.resources {
+		acc, err := json.Marshal(r.Access())
+		if err != nil {
+			return err
+		}
+		re := types.Resource{
+			Name:   r.Name(),
+			Type:   r.Type(),
+			Access: acc,
+		}
+		c.descriptor.Resources = append(c.descriptor.Resources, re)
+	}
 
-	c.descriptor.Signatures = c.signatures
+	// c.descriptor.Signatures = c.signatures
 
-	c.descriptor.StorageContext = c.storageContext
+	c.descriptor.RepositoryContext = c.storageContext
 
 	return nil
 }
@@ -110,7 +101,7 @@ func (c *component) Provider() (*v2.Provider, error) {
 	return c.base.Provider()
 }
 
-func (c *component) StorageContext() ([]v2.StorageContext, error) {
+func (c *component) RepositoryContext() ([]v2.RepositoryContext, error) {
 	if err := c.compute(); err != nil {
 		return nil, err
 	}
