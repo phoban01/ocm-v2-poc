@@ -12,18 +12,29 @@ type artifactAccess struct {
 	image *image
 }
 
-func (b *artifactAccess) Type() v2.AccessType {
+func (a *artifactAccess) Type() v2.AccessType {
 	return v2.AccessType("ociArtifact")
 }
 
-func (b *artifactAccess) Data() (io.ReadCloser, error) {
-	return mutate.Extract(b.image.img), nil
+func (a *artifactAccess) Data() (io.ReadCloser, error) {
+	return mutate.Extract(a.image.img), nil
 }
 
-func (d *artifactAccess) MarshalJSON() ([]byte, error) {
+func (a *artifactAccess) MarshalJSON() ([]byte, error) {
 	result := map[string]string{
-		"imageReference": d.image.ref,
-		"type":           string(d.Type()),
+		"imageReference": a.image.ref,
+		"type":           string(a.Type()),
 	}
 	return json.Marshal(result)
+}
+
+func (a *artifactAccess) UnmarshalJSON(data []byte) error {
+	obj := make(map[string]string)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	a.image = &image{
+		ref: obj["imageReference"],
+	}
+	return nil
 }

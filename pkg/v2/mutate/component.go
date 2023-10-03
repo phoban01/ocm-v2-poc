@@ -34,11 +34,7 @@ func (c *component) compute() error {
 		return nil
 	}
 
-	for _, add := range c.addResources {
-		rc := add
-		c.resources = append(c.resources, rc)
-	}
-
+	c.resources = c.addResources
 	c.addResources = nil
 
 	sigs, err := c.base.Signatures()
@@ -75,10 +71,15 @@ func (c *component) compute() error {
 		if err != nil {
 			return err
 		}
+		dig, err := r.Digest()
+		if err != nil {
+			return err
+		}
 		re := types.Resource{
 			Name:   r.Name(),
 			Type:   r.Type(),
 			Access: acc,
+			Digest: dig,
 		}
 		c.descriptor.Resources = append(c.descriptor.Resources, re)
 	}

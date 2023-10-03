@@ -2,7 +2,6 @@ package file
 
 import (
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -27,8 +26,14 @@ func (f *file) Name() string {
 	return f.name
 }
 
-func (f file) WithLocation(p string) v2.Resource {
-	return &file{name: f.name, path: p}
+func (f *file) Type() types.ResourceType {
+	return Type
+}
+
+func (f *file) Labels() map[string]string {
+	return map[string]string{
+		"ocm.software/filename": f.path,
+	}
 }
 
 func (f *file) Deferrable() bool {
@@ -57,57 +62,5 @@ func (f *file) Digest() (types.Digest, error) {
 		HashAlgorithm:          "sha256",
 		NormalisationAlgorithm: "json/v1",
 		Value:                  fmt.Sprintf("%x", hash.Sum(nil)),
-	}, nil
-}
-
-func (f *file) Type() types.ResourceType {
-	return Type
-}
-
-func (f *file) Labels() map[string]string {
-	return map[string]string{
-		"ocm.software/filename": f.path,
-	}
-}
-
-func (f *file) MarshalJSON() ([]byte, error) {
-	access, err := json.Marshal(f.Access())
-	if err != nil {
-		return nil, err
-	}
-	r := types.Resource{
-		Name:   f.name,
-		Type:   f.Type(),
-		Access: access,
-	}
-	return json.Marshal(r)
-}
-
-func (f *file) UnmarshalJSON(data []byte) error {
-	r := types.Resource{}
-	if err := json.Unmarshal(data, &r); err != nil {
-		return err
-	}
-
-	a := access{}
-	if err := json.Unmarshal(r.Access, &a); err != nil {
-		return err
-	}
-
-	f.name = r.Name
-	f.path = a.file.path
-
-	return nil
-}
-
-func DecodeResource(resource types.Resource) (v2.Resource, error) {
-	a := access{}
-	if err := json.Unmarshal(resource.Access, &a); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal access: %w", err)
-	}
-
-	return &file{
-		name: resource.Name,
-		path: a.file.path,
 	}, nil
 }

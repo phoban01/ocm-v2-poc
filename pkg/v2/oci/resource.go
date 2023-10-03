@@ -1,7 +1,6 @@
 package oci
 
 import (
-	"encoding/json"
 	"strings"
 
 	"github.com/google/go-containerregistry/pkg/authn"
@@ -13,12 +12,15 @@ import (
 )
 
 type image struct {
-	name string
-	ref  string
-	img  v1.Image
+	name   string
+	ref    string
+	digest *types.Digest
+	img    v1.Image
 }
 
 var _ v2.Resource = (*image)(nil)
+
+const Type types.ResourceType = "ociImage"
 
 func Resource(name, ref string) v2.Resource {
 	return &image{name: name, ref: ref}
@@ -37,6 +39,17 @@ func (f *image) compute() error {
 
 	f.img = img
 
+	hash, err := img.Digest()
+	if err != nil {
+		return err
+	}
+
+	f.digest = &types.Digest{
+		HashAlgorithm:          "sha256",
+		NormalisationAlgorithm: "json/v1",
+		Value:                  strings.TrimPrefix(hash.String(), "sha256:"),
+	}
+
 	return nil
 }
 
@@ -51,32 +64,12 @@ func (f *image) Access() v2.Access {
 	return &artifactAccess{image: f}
 }
 
-func (f image) WithLocation(url string) v2.Resource {
-	return &image{name: f.name, ref: url}
-}
-
 func (f *image) Deferrable() bool {
 	return true
 }
 
-func (f *image) Digest() (types.Digest, error) {
-	if err := f.compute(); err != nil {
-		return types.Digest{}, err
-	}
-	hash, err := f.img.Digest()
-	if err != nil {
-		return types.Digest{}, err
-	}
-	dig := types.Digest{
-		HashAlgorithm:          "sha256",
-		NormalisationAlgorithm: "json/v1",
-		Value:                  strings.TrimPrefix(hash.String(), "sha256:"),
-	}
-	return dig, nil
-}
-
 func (f *image) Type() types.ResourceType {
-	return "ociImage"
+	return Type
 }
 
 func (f *image) Labels() map[string]string {
@@ -85,10 +78,12 @@ func (f *image) Labels() map[string]string {
 	}
 }
 
-func (f *image) MarshalJSON() ([]byte, error) {
-	return json.Marshal(f)
-}
-
-func (f *image) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, f)
+func (f *image) Digest() (types.Digest, error) {
+	if f.digest != nil {
+		return *f.digest, nil
+	}
+	if err := f.compute(); err != nil {
+		return types.Digest{}, err
+	}
+	return *f.digest, nil
 }

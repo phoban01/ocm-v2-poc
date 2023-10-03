@@ -2,7 +2,6 @@ package archive
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -30,9 +29,10 @@ func (r *repository) Write(component v2.Component) error {
 		return err
 	}
 
-	fmt.Println(len(resources))
+	visitedResources := make([]v2.Resource, 0)
 	for _, item := range resources {
 		if item.Deferrable() {
+			visitedResources = append(visitedResources, item)
 			continue
 		}
 
@@ -58,10 +58,10 @@ func (r *repository) Write(component v2.Component) error {
 			return err
 		}
 
-		item = item.WithLocation(p)
-
-		component = mutate.WithResources(component, item)
+		visitedResources = append(visitedResources, item.WithLocation(p))
 	}
+
+	component = mutate.WithResources(component, visitedResources...)
 
 	desc, err := component.Descriptor()
 	if err != nil {

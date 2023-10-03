@@ -8,10 +8,10 @@ type Descriptor struct {
 	Version           string              `json:"version"`
 	Provider          Provider            `json:"provider"`
 	RepositoryContext []RepositoryContext `json:"repository_context,omitempty"`
-	Resources         []types.Resource    `json:"resources"`
-	Sources           []types.Signature   `json:"sources"`
-	References        []types.Reference   `json:"references"`
-	Signatures        []types.Signature   `json:"signatures"`
+	Resources         []types.Resource    `json:"resources,omitempty"`
+	Sources           []types.Signature   `json:"sources,omitempty"`
+	References        []types.Reference   `json:"references,omitempty"`
+	Signatures        []types.Signature   `json:"signatures,omitempty"`
 }
 
 type Metadata struct {
