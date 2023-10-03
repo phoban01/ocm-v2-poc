@@ -50,4 +50,7 @@ func main() {
 	}
 }
 ```
+
+## Operations
+
 ![image](https://github.com/phoban01/ocm-v2/assets/4415593/9e15a2c8-a7e5-4742-89fb-8ee10fb8d091)
