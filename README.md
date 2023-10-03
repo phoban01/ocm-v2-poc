@@ -2,11 +2,11 @@
 
 This is an experimental re-imagining of how the core OCM library could look.
 
+**this is not a feature complete implementation, it is a draft**
+
 It is heavily inspired by the structure of go-containerregistry. 
 
 The API provides some basic primitives which can be composed to create components.
-
-Access methods are provided by satisfying the `Resource` interface.
 
 The following example shows how we can build a component and write to a repository:
 
