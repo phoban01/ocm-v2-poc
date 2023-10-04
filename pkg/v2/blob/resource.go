@@ -1,4 +1,4 @@
-package file
+package blob
 
 import (
 	"crypto/sha256"
@@ -10,42 +10,47 @@ import (
 	"github.com/phoban01/ocm-v2/pkg/v2/types"
 )
 
-type file struct {
+type blob struct {
 	name string
 	path string
+	data []byte
 }
 
-const Type types.ResourceType = "file"
+const Type types.ResourceType = "blob"
 
-var _ v2.Resource = (*file)(nil)
+var _ v2.Resource = (*blob)(nil)
 
-func Resource(name, path string) v2.Resource {
-	return &file{name: name, path: path}
+func FromBytes(name string, data []byte) v2.Resource {
+	return &blob{name: name, data: data}
 }
 
-func (f *file) Name() string {
+func FromFile(name string, path string) v2.Resource {
+	return &blob{name: name, path: path}
+}
+
+func (f *blob) Name() string {
 	return f.name
 }
 
-func (f *file) Type() types.ResourceType {
+func (f *blob) Type() types.ResourceType {
 	return Type
 }
 
-func (f *file) Labels() map[string]string {
+func (f *blob) Labels() map[string]string {
 	return map[string]string{
-		"ocm.software/filename": f.path,
+		"ocm.software/blobname": f.path,
 	}
 }
 
-func (f *file) Deferrable() bool {
+func (f *blob) Deferrable() bool {
 	return false
 }
 
-func (f *file) Access() v2.Access {
-	return &access{file: f}
+func (f *blob) Access() v2.Access {
+	return &access{blob: f}
 }
 
-func (f *file) Digest() (types.Digest, error) {
+func (f *blob) Digest() (types.Digest, error) {
 	data, err := f.Access().Data()
 	if err != nil {
 		return types.Digest{}, err
@@ -53,7 +58,6 @@ func (f *file) Digest() (types.Digest, error) {
 	defer data.Close()
 
 	hash := sha256.New()
-
 	_, err = io.Copy(hash, data)
 	if err != nil {
 		return types.Digest{}, err
@@ -66,11 +70,11 @@ func (f *file) Digest() (types.Digest, error) {
 	}, nil
 }
 
-func (f file) WithLocation(p string) v2.Resource {
-	return &file{name: f.name, path: p}
+func (f blob) WithLocation(p string) v2.Resource {
+	return &blob{name: f.name, path: p}
 }
 
-func (f *file) MarshalJSON() ([]byte, error) {
+func (f *blob) MarshalJSON() ([]byte, error) {
 	access, err := json.Marshal(f.Access())
 	if err != nil {
 		return nil, err
@@ -88,7 +92,7 @@ func (f *file) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-func (f *file) UnmarshalJSON(data []byte) error {
+func (f *blob) UnmarshalJSON(data []byte) error {
 	r := types.Resource{}
 	if err := json.Unmarshal(data, &r); err != nil {
 		return err
@@ -100,7 +104,7 @@ func (f *file) UnmarshalJSON(data []byte) error {
 	}
 
 	f.name = r.Name
-	f.path = a.file.path
+	f.path = a.blob.path
 
 	return nil
 }

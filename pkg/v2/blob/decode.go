@@ -1,4 +1,4 @@
-package file
+package blob
 
 import (
 	"encoding/json"
@@ -10,18 +10,18 @@ import (
 )
 
 func init() {
-	decode.Register(Type, FileDecoder{})
+	decode.Register(Type, BlobDecoder{})
 }
 
-type FileDecoder struct{}
+type BlobDecoder struct{}
 
-func (d FileDecoder) Decode(resource types.Resource) (v2.Resource, error) {
+func (d BlobDecoder) Decode(resource types.Resource) (v2.Resource, error) {
 	a := access{}
 	if err := json.Unmarshal(resource.Access, &a); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal access: %w", err)
 	}
-	return &file{
+	return &blob{
 		name: resource.Name,
-		path: a.file.path,
+		path: a.blob.path,
 	}, nil
 }

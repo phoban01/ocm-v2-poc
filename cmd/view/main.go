@@ -30,7 +30,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		table = append(table, []string{v.Name(), string(v.Type()), dig.Value})
+		table = append(table, []string{string(v.Type()), v.Name(), dig.Value})
 	}
 
 	printTable(table)

@@ -1,6 +1,7 @@
-package file
+package blob
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"os"
@@ -9,7 +10,7 @@ import (
 )
 
 type access struct {
-	file *file
+	blob *blob
 }
 
 var _ v2.Access = (*access)(nil)
@@ -19,12 +20,15 @@ func (a *access) Type() v2.AccessType {
 }
 
 func (a *access) Data() (io.ReadCloser, error) {
-	return os.Open(a.file.path)
+	if a.blob.data != nil {
+		return io.NopCloser(bytes.NewReader(a.blob.data)), nil
+	}
+	return os.Open(a.blob.path)
 }
 
 func (a *access) MarshalJSON() ([]byte, error) {
 	result := map[string]string{
-		"localReference": a.file.path,
+		"localReference": a.blob.path,
 		"type":           string(a.Type()),
 	}
 	return json.Marshal(result)
@@ -35,7 +39,7 @@ func (a *access) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
-	a.file = &file{
+	a.blob = &blob{
 		path: obj["localReference"],
 	}
 	return nil

@@ -5,7 +5,7 @@ import (
 	"github.com/phoban01/ocm-v2/pkg/v2/decode"
 
 	// the following artifact types are supported
-	_ "github.com/phoban01/ocm-v2/pkg/v2/file"
+	_ "github.com/phoban01/ocm-v2/pkg/v2/blob"
 	_ "github.com/phoban01/ocm-v2/pkg/v2/oci"
 )
 
