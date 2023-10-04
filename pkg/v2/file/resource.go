@@ -2,6 +2,7 @@ package file
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -63,4 +64,43 @@ func (f *file) Digest() (types.Digest, error) {
 		NormalisationAlgorithm: "json/v1",
 		Value:                  fmt.Sprintf("%x", hash.Sum(nil)),
 	}, nil
+}
+
+func (f file) WithLocation(p string) v2.Resource {
+	return &file{name: f.name, path: p}
+}
+
+func (f *file) MarshalJSON() ([]byte, error) {
+	access, err := json.Marshal(f.Access())
+	if err != nil {
+		return nil, err
+	}
+	dig, err := f.Digest()
+	if err != nil {
+		return nil, err
+	}
+	r := types.Resource{
+		Name:   f.name,
+		Type:   f.Type(),
+		Access: access,
+		Digest: dig,
+	}
+	return json.Marshal(r)
+}
+
+func (f *file) UnmarshalJSON(data []byte) error {
+	r := types.Resource{}
+	if err := json.Unmarshal(data, &r); err != nil {
+		return err
+	}
+
+	a := access{}
+	if err := json.Unmarshal(r.Access, &a); err != nil {
+		return err
+	}
+
+	f.name = r.Name
+	f.path = a.file.path
+
+	return nil
 }

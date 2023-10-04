@@ -5,22 +5,17 @@ import (
 	"fmt"
 
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
+	"github.com/phoban01/ocm-v2/pkg/v2/decode"
 	"github.com/phoban01/ocm-v2/pkg/v2/types"
 )
 
-func (f image) WithLocation(url string) v2.Resource {
-	return &image{name: f.name, ref: url}
+func init() {
+	decode.Register(Type, ImageDecoder{})
 }
 
-func (f *image) MarshalJSON() ([]byte, error) {
-	return json.Marshal(f)
-}
+type ImageDecoder struct{}
 
-func (f *image) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, f)
-}
-
-func DecodeResource(resource types.Resource) (v2.Resource, error) {
+func (d ImageDecoder) Decode(resource types.Resource) (v2.Resource, error) {
 	a := artifactAccess{}
 	if err := json.Unmarshal(resource.Access, &a); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal access: %w", err)

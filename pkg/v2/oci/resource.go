@@ -1,6 +1,7 @@
 package oci
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/google/go-containerregistry/pkg/authn"
@@ -86,4 +87,16 @@ func (f *image) Digest() (types.Digest, error) {
 		return types.Digest{}, err
 	}
 	return *f.digest, nil
+}
+
+func (f image) WithLocation(url string) v2.Resource {
+	return &image{name: f.name, ref: url}
+}
+
+func (f *image) MarshalJSON() ([]byte, error) {
+	return json.Marshal(f)
+}
+
+func (f *image) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, f)
 }
