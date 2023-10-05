@@ -76,8 +76,10 @@ func (c *component) compute() error {
 			return err
 		}
 		re := types.Resource{
-			Name:   r.Name(),
-			Type:   r.Type(),
+			ObjectMeta: types.ObjectMeta{
+				Name: r.Name(),
+				Type: r.Type(),
+			},
 			Access: acc,
 			Digest: dig,
 		}

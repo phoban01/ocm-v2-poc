@@ -2,11 +2,8 @@ package archive
 
 import (
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
-	"github.com/phoban01/ocm-v2/pkg/v2/decode"
 
-	// the following artifact types are supported
-	_ "github.com/phoban01/ocm-v2/pkg/v2/blob"
-	_ "github.com/phoban01/ocm-v2/pkg/v2/oci"
+	"github.com/phoban01/ocm-v2/pkg/v2/provider"
 )
 
 type component struct {
@@ -19,7 +16,7 @@ var _ v2.Component = (*component)(nil)
 
 func (c *component) compute() error {
 	for _, res := range c.descriptor.Resources {
-		dr, err := decode.Resource(res)
+		dr, err := provider.GetResource(res)
 		if err != nil {
 			return err
 		}

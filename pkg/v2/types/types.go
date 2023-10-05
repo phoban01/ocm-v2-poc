@@ -2,31 +2,30 @@ package types
 
 import "encoding/json"
 
-type ResourceType string
-
 type MediaType string
 
-type Decodable interface {
-	Resource | Source | Reference
+type ObjectMeta struct {
+	Name        string            `json:"name"`
+	Type        ResourceType      `json:"type"`
+	Labels      map[string]string `json:"labels"`
+	Annotations map[string]string `json:"annotations"`
+	Version     string            `json:"version,omitempty"`
 }
 
 type Resource struct {
-	Name   string          `json:"name"`
-	Type   ResourceType    `json:"type"`
-	Access json.RawMessage `json:"access"`
-	Digest *Digest         `json:"digest"`
+	ObjectMeta `json:",inline"`
+	Access     json.RawMessage `json:"access"`
+	Digest     *Digest         `json:"digest"`
 }
 
 type Source struct {
-	Name   string          `json:"name"`
-	Type   string          `json:"type"`
-	Access json.RawMessage `json:"access"`
+	ObjectMeta `json:",inline"`
+	Access     json.RawMessage `json:"access"`
 }
 
 type Reference struct {
-	Name   string          `json:"name"`
-	Type   string          `json:"type"`
-	Access json.RawMessage `json:"access"`
+	ObjectMeta `json:",inline"`
+	Access     json.RawMessage `json:"access"`
 }
 
 type Signature struct {

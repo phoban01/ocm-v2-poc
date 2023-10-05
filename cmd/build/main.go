@@ -2,39 +2,45 @@ package main
 
 import (
 	"log"
-	"os"
 
-	"github.com/phoban01/ocm-v2/pkg/providers/myblob"
-	"github.com/phoban01/ocm-v2/pkg/providers/myoci"
+	"github.com/phoban01/ocm-v2/pkg/providers/blob"
+	"github.com/phoban01/ocm-v2/pkg/providers/oci"
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
 	"github.com/phoban01/ocm-v2/pkg/v2/archive"
-	"github.com/phoban01/ocm-v2/pkg/v2/blob"
 	"github.com/phoban01/ocm-v2/pkg/v2/builder"
 	"github.com/phoban01/ocm-v2/pkg/v2/mutate"
-	"github.com/phoban01/ocm-v2/pkg/v2/oci"
+	"github.com/phoban01/ocm-v2/pkg/v2/types"
 )
 
 func main() {
-	myoci.Use()
-	myblob.Use()
-
 	// create a new component
 	cmp := builder.New("ocm.software/test", "v1.0.0", "acme.org")
 
-	data, err := os.ReadFile("config.yaml")
+	// define file access
+	config, err := blob.FromFile("config.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// create resources
-	resources := []v2.Resource{
-		blob.FromBytes("data", data),
-		blob.FromFile("config", "config.yaml", blob.WithMediaType(myblob.MediaType)),
-		oci.Resource("web-server", "docker.io/nginx:1.25.2"),
-		oci.Resource("redis", "docker.io/redis:latest", oci.WithMediaType(myoci.MediaType)),
+	// define image access
+	image, err := oci.FromImage("docker.io/redis:latest")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	// add the resource to the component
+	// gather resources
+	resources := []v2.Resource{
+		builder.NewResource(types.ObjectMeta{
+			Name: "config",
+			Type: types.Blob,
+		}, config),
+		builder.NewResource(types.ObjectMeta{
+			Name: "image",
+			Type: types.OCIImage,
+		}, image, builder.Deferrable(true)),
+	}
+
+	// add the resources to the component
 	cmp = mutate.WithResources(cmp, resources...)
 
 	// setup the repository

@@ -2,7 +2,7 @@ package builder
 
 import (
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
-	"github.com/phoban01/ocm-v2/pkg/v2/decode"
+	"github.com/phoban01/ocm-v2/pkg/v2/types"
 )
 
 type component struct {
@@ -23,17 +23,17 @@ func New(name, version, provider string) v2.Component {
 }
 
 func (c *component) compute() error {
-	desc, err := c.Descriptor()
-	if err != nil {
-		return err
-	}
-	for _, res := range desc.Resources {
-		dr, err := decode.Resource(res)
-		if err != nil {
-			return err
-		}
-		c.resources = append(c.resources, dr)
-	}
+	// desc, err := c.Descriptor()
+	// if err != nil {
+	// 	return err
+	// }
+	// for _, res := range desc.Resources {
+	// 	dr, err := decode.Resource(res)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	c.resources = append(c.resources, dr)
+	// }
 	return nil
 }
 
@@ -49,13 +49,13 @@ func (c *component) Provider() (*v2.Provider, error) {
 
 func (c *component) Descriptor() (*v2.Descriptor, error) {
 	return &v2.Descriptor{
-		Metadata: v2.Metadata{
-			Name: c.name,
+		ObjectMeta: types.ObjectMeta{
+			Name:    c.name,
+			Version: c.version,
 		},
 		Provider: v2.Provider{
 			Name: c.provider,
 		},
-		Version: c.version,
 	}, nil
 }
 

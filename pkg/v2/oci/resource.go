@@ -56,7 +56,7 @@ func (f *image) Type() types.ResourceType {
 
 func (f *image) Labels() map[string]string {
 	return map[string]string{
-		// "ocm.software/reference": f.access.ref,
+		"ocm.software/reference": f.access.ref,
 	}
 }
 

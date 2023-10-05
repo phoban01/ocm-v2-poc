@@ -12,11 +12,6 @@ import (
 	"github.com/phoban01/ocm-v2/pkg/v2/types"
 )
 
-type Provider interface {
-	v2.Access
-	Decode(resource types.Resource) (v2.Access, error)
-}
-
 var providers = make(map[string]Provider)
 
 func Register(p Provider) error {
@@ -31,7 +26,7 @@ func Register(p Provider) error {
 	return nil
 }
 
-func Lookup(resource types.Resource) (v2.Access, error) {
+func lookup(resource types.Resource) (v2.Access, error) {
 	acc := make(map[string]any)
 	if err := json.Unmarshal(resource.Access, &acc); err != nil {
 		return nil, err
