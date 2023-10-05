@@ -9,7 +9,7 @@ type Resource interface {
 	Transporter
 	Type() types.ResourceType
 	Access() Access
-	Digest() (types.Digest, error)
+	Digest() (*types.Digest, error)
 }
 
 type ObjectMeta interface {

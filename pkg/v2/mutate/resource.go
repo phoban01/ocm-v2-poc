@@ -27,8 +27,9 @@ func (r *resource) Access() v2.Access {
 	return r.access
 }
 
-func (r *resource) Digest() (types.Digest, error) {
-	return r.base.Digest()
+func (r *resource) Digest() (*types.Digest, error) {
+	r.compute()
+	return r.access.Digest()
 }
 
 func (r *resource) Type() types.ResourceType {
@@ -40,7 +41,8 @@ func (r *resource) Labels() map[string]string {
 }
 
 func (r *resource) WithLocation(p string) v2.Resource {
-	return r.base.WithLocation(p)
+	r.access.WithLocation(p)
+	return r
 }
 
 func (r *resource) Deferrable() bool {

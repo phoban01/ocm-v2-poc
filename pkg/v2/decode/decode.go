@@ -8,7 +8,7 @@ import (
 var registry = make(map[types.ResourceType]Decoder)
 
 type Decoder interface {
-	Decode(resource types.Resource) (v2.Resource, error)
+	Decode(types.Resource) (v2.Resource, error)
 }
 
 func Register(resourceType types.ResourceType, decoder Decoder) {

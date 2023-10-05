@@ -2,21 +2,14 @@ package oci
 
 import (
 	"encoding/json"
-	"strings"
 
-	"github.com/google/go-containerregistry/pkg/authn"
-	"github.com/google/go-containerregistry/pkg/name"
-	v1 "github.com/google/go-containerregistry/pkg/v1"
-	"github.com/google/go-containerregistry/pkg/v1/remote"
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
 	"github.com/phoban01/ocm-v2/pkg/v2/types"
 )
 
 type image struct {
 	name   string
-	ref    string
-	digest *types.Digest
-	img    v1.Image
+	access v2.Access
 }
 
 var _ v2.Resource = (*image)(nil)
@@ -24,34 +17,9 @@ var _ v2.Resource = (*image)(nil)
 const Type types.ResourceType = "ociImage"
 
 func Resource(name, ref string) v2.Resource {
-	return &image{name: name, ref: ref}
-}
-
-func (f *image) compute() error {
-	ref, err := name.ParseReference(f.ref)
-	if err != nil {
-		return err
-	}
-
-	img, err := remote.Image(ref, remote.WithAuthFromKeychain(authn.DefaultKeychain))
-	if err != nil {
-		return err
-	}
-
-	f.img = img
-
-	hash, err := img.Digest()
-	if err != nil {
-		return err
-	}
-
-	f.digest = &types.Digest{
-		HashAlgorithm:          "sha256",
-		NormalisationAlgorithm: "json/v1",
-		Value:                  strings.TrimPrefix(hash.String(), "sha256:"),
-	}
-
-	return nil
+	return &image{name: name, access: &access{
+		ref: ref,
+	}}
 }
 
 func (f *image) Name() string {
@@ -59,10 +27,11 @@ func (f *image) Name() string {
 }
 
 func (f *image) Access() v2.Access {
-	if err := f.compute(); err != nil {
-		return nil
-	}
-	return &artifactAccess{image: f}
+	return f.access
+}
+
+func (f *image) Digest() (*types.Digest, error) {
+	return f.access.Digest()
 }
 
 func (f *image) Deferrable() bool {
@@ -75,22 +44,13 @@ func (f *image) Type() types.ResourceType {
 
 func (f *image) Labels() map[string]string {
 	return map[string]string{
-		"ocm.software/reference": f.ref,
+		// "ocm.software/reference": f.access.ref,
 	}
 }
 
-func (f *image) Digest() (types.Digest, error) {
-	if f.digest != nil {
-		return *f.digest, nil
-	}
-	if err := f.compute(); err != nil {
-		return types.Digest{}, err
-	}
-	return *f.digest, nil
-}
-
-func (f image) WithLocation(url string) v2.Resource {
-	return &image{name: f.name, ref: url}
+func (f *image) WithLocation(url string) v2.Resource {
+	f.access.WithLocation(url)
+	return f
 }
 
 func (f *image) MarshalJSON() ([]byte, error) {

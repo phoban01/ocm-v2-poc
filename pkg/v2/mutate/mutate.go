@@ -1,6 +1,8 @@
 package mutate
 
-import v2 "github.com/phoban01/ocm-v2/pkg/v2"
+import (
+	v2 "github.com/phoban01/ocm-v2/pkg/v2"
+)
 
 func WithAccess(base v2.Resource, access v2.Access) v2.Resource {
 	return &resource{

@@ -1,4 +1,4 @@
-package oci
+package main
 
 import (
 	"encoding/json"
@@ -33,10 +33,6 @@ func (a *access) Type() v2.AccessType {
 
 func (a *access) MediaType() string {
 	return "application/vnd.docker.image"
-}
-
-func (a *access) WithLocation(r string) {
-	a.ref = r
 }
 
 func (a *access) Labels() map[string]string {
@@ -90,6 +86,10 @@ func (a *access) Decode(resource types.Resource) (v2.Access, error) {
 		return nil, fmt.Errorf("failed to unmarshal access: %w", err)
 	}
 	return a, nil
+}
+
+func (a *access) WithLocation(p string) {
+	a.ref = p
 }
 
 func (a *access) compute() error {

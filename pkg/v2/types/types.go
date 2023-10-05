@@ -14,7 +14,7 @@ type Resource struct {
 	Name   string          `json:"name"`
 	Type   ResourceType    `json:"type"`
 	Access json.RawMessage `json:"access"`
-	Digest Digest          `json:"digest"`
+	Digest *Digest         `json:"digest"`
 }
 
 type Source struct {

@@ -5,9 +5,12 @@ import (
 	"log"
 
 	"github.com/phoban01/ocm-v2/pkg/v2/archive"
+	"github.com/phoban01/ocm-v2/pkg/v2/provider"
 )
 
 func main() {
+	provider.Register(&accessor{})
+
 	ctf, err := archive.Repository("test-ctf")
 	if err != nil {
 		log.Fatal(err)
@@ -24,13 +27,16 @@ func main() {
 	}
 
 	var table [][]string
-	table = append(table, []string{"TYPE", "NAME", "DIGEST"})
+	table = append(table, []string{"TYPE", "NAME", "MEDIA TYPE", "DIGEST"})
 	for _, v := range res {
 		dig, err := v.Digest()
 		if err != nil {
 			log.Fatal(err)
 		}
-		table = append(table, []string{string(v.Type()), v.Name(), dig.Value})
+		table = append(
+			table,
+			[]string{string(v.Type()), v.Name(), v.Access().MediaType(), dig.Value},
+		)
 	}
 
 	printTable(table)

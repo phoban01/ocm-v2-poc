@@ -24,7 +24,7 @@ func main() {
 	// create resources
 	resources := []v2.Resource{
 		blob.FromBytes("data", data),
-		blob.FromFile("config", "config.yaml"),
+		blob.FromFile("config", "config.yaml", blob.WithMediaType("custom-blob")),
 		oci.Resource("web-server", "docker.io/nginx:1.25.2"),
 		oci.Resource("redis", "docker.io/redis:latest"),
 	}
