@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/phoban01/ocm-v2/api/v2/archive"
 	"github.com/phoban01/ocm-v2/api/v2/builder"
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
@@ -40,12 +41,12 @@ func main() {
 	cmp = mutate.WithResources(cmp, config, image)
 
 	// setup the repository
-	repo, err := oci.Repository("ghcr.io/phoban01")
+	repo, err := archive.Repository("transport-archive")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// write the component to the repository
+	// write the component to the archive
 	if err := repo.Write(cmp); err != nil {
 		log.Fatal(err)
 	}
