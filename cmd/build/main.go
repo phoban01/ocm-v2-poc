@@ -7,7 +7,6 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
 	"github.com/phoban01/ocm-v2/pkg/providers/blob"
-	_ "github.com/phoban01/ocm-v2/pkg/providers/helm"
 	"github.com/phoban01/ocm-v2/pkg/providers/oci"
 )
 

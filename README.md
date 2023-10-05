@@ -16,41 +16,54 @@ package main
 import (
 	"log"
 
-	v2 "github.com/phoban01/ocm-v2/pkg/v2"
-	"github.com/phoban01/ocm-v2/pkg/v2/archive"
-	"github.com/phoban01/ocm-v2/pkg/v2/builder"
-	"github.com/phoban01/ocm-v2/pkg/v2/file"
-	"github.com/phoban01/ocm-v2/pkg/v2/mutate"
-	"github.com/phoban01/ocm-v2/pkg/v2/oci"
+	"github.com/phoban01/ocm-v2/api/v2/builder"
+	"github.com/phoban01/ocm-v2/api/v2/mutate"
+	"github.com/phoban01/ocm-v2/api/v2/types"
+	"github.com/phoban01/ocm-v2/pkg/providers/blob"
+	"github.com/phoban01/ocm-v2/pkg/providers/oci"
 )
 
 func main() {
+	// define config resource
+	configFile, err := blob.FromFile("config.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	config := builder.NewResource(types.ObjectMeta{
+		Name: "config",
+		Type: types.Blob,
+	}, configFile)
+
+	// define image resource
+	imageAcc, err := oci.FromImage("docker.io/redis:latest")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	image := builder.NewResource(types.ObjectMeta{
+		Name: "image",
+		Type: types.OCIImage,
+	}, imageAcc, builder.Deferrable(true))
+
 	// create a new component
 	cmp := builder.New("ocm.software/test", "v1.0.0", "acme.org")
 
-	// create resources
-	resources := []v2.Resource{
-		file.Resource("data", "config.yaml"),
-		oci.Resource("web-server", "docker.io/nginx:1.25.2"),
-		oci.Resource("redis", "docker.io/redis:latest"),
-	}
-
 	// add the resources to the component
-	cmp = mutate.WithResources(cmp, resources...)
+	cmp = mutate.WithResources(cmp, config, image)
 
-	// setup the repository 
-	ctf, err := archive.Repository("./test-ctf")
+	// setup the repository
+	repo, err := oci.Repository("ghcr.io/phoban01")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// write the component to the repository
-	if err := ctf.Write(cmp); err != nil {
+	if err := repo.Write(cmp); err != nil {
 		log.Fatal(err)
 	}
 }
 ```
-
 ## Operations
 
 ![image](https://github.com/phoban01/ocm-v2/assets/4415593/9e15a2c8-a7e5-4742-89fb-8ee10fb8d091)
