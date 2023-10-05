@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	v2 "github.com/phoban01/ocm-v2/pkg/v2"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
 )
 
 func (r *repository) Get(name, version string) (v2.Component, error) {

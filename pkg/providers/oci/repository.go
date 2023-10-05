@@ -12,8 +12,8 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/static"
 	"github.com/google/go-containerregistry/pkg/v1/tarball"
 	"github.com/google/go-containerregistry/pkg/v1/types"
-	v2 "github.com/phoban01/ocm-v2/pkg/v2"
-	"github.com/phoban01/ocm-v2/pkg/v2/mutate"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/mutate"
 )
 
 type repository struct {
@@ -57,7 +57,7 @@ func (s *repository) Write(component v2.Component) error {
 	url := fmt.Sprintf(
 		"%s/component-descriptors/%s:%s",
 		s.registry,
-		desc.Metadata.Name,
+		desc.Name,
 		desc.Version,
 	)
 
@@ -97,6 +97,8 @@ func (s *repository) Write(component v2.Component) error {
 		return err
 	}
 
+	// TODO: ensure access is updated correctly; this pushes the layer
+	// but doesn't update the location or component descriptor.
 	for _, r := range resources {
 		if r.Deferrable() {
 			continue

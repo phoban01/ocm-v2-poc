@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"sync"
 
-	v2 "github.com/phoban01/ocm-v2/pkg/v2"
-	"github.com/phoban01/ocm-v2/pkg/v2/types"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
 type component struct {
@@ -34,7 +34,9 @@ func (c *component) compute() error {
 		return nil
 	}
 
-	c.resources = c.addResources
+	if c.addResources != nil {
+		c.resources = c.addResources
+	}
 	c.addResources = nil
 
 	sigs, err := c.base.Signatures()

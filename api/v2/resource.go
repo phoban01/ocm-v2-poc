@@ -1,7 +1,7 @@
 package v2
 
 import (
-	"github.com/phoban01/ocm-v2/pkg/v2/types"
+	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
 type Resource interface {

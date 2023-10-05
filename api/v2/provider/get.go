@@ -3,10 +3,10 @@ package provider
 import (
 	"fmt"
 
-	v2 "github.com/phoban01/ocm-v2/pkg/v2"
-	"github.com/phoban01/ocm-v2/pkg/v2/builder"
-	"github.com/phoban01/ocm-v2/pkg/v2/mutate"
-	"github.com/phoban01/ocm-v2/pkg/v2/types"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/builder"
+	"github.com/phoban01/ocm-v2/api/v2/mutate"
+	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
 func GetResource(r types.Resource) (v2.Resource, error) {

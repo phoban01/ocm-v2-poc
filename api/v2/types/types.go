@@ -6,9 +6,9 @@ type MediaType string
 
 type ObjectMeta struct {
 	Name        string            `json:"name"`
-	Type        ResourceType      `json:"type"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	Type        ResourceType      `json:"type,omitempty"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 	Version     string            `json:"version,omitempty"`
 }
 

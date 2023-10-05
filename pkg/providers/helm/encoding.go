@@ -1,4 +1,4 @@
-package oci
+package helm
 
 import (
 	"encoding/json"
@@ -17,7 +17,7 @@ func (a *accessor) Decode(resource types.Resource) (v2.Access, error) {
 
 func (a *accessor) MarshalJSON() ([]byte, error) {
 	result := map[string]string{
-		"imageReference": a.ref,
+		"localReference": a.filepath,
 		"type":           string(a.Type()),
 		"mediaType":      a.MediaType(),
 	}
@@ -29,6 +29,6 @@ func (a *accessor) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
-	a.ref = obj["imageReference"]
+	a.filepath = obj["localReference"]
 	return nil
 }

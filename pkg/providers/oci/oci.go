@@ -2,8 +2,8 @@ package oci
 
 import (
 	v1 "github.com/google/go-containerregistry/pkg/v1"
-	v2 "github.com/phoban01/ocm-v2/pkg/v2"
-	"github.com/phoban01/ocm-v2/pkg/v2/provider"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/provider"
 )
 
 type accessor struct {

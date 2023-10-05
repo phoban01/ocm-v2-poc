@@ -3,8 +3,8 @@ package builder
 import (
 	"encoding/json"
 
-	v2 "github.com/phoban01/ocm-v2/pkg/v2"
-	"github.com/phoban01/ocm-v2/pkg/v2/types"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
 type resource struct {
@@ -13,6 +13,7 @@ type resource struct {
 	deferrable   bool
 	resourceType types.ResourceType
 	labels       map[string]string
+	digest       *types.Digest
 }
 
 var _ v2.Resource = (*resource)(nil)
@@ -61,6 +62,9 @@ func (r *resource) Access() v2.Access {
 }
 
 func (r *resource) Digest() (*types.Digest, error) {
+	if r.digest != nil {
+		return r.digest, nil
+	}
 	return r.access.Digest()
 }
 
@@ -90,6 +94,7 @@ func (r *resource) UnmarshalJSON(data []byte) error {
 	}
 	r.name = res.Name
 	r.resourceType = res.Type
+	r.digest = res.Digest
 	return nil
 }
 

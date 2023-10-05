@@ -1,4 +1,4 @@
-package blob
+package helm
 
 import (
 	v2 "github.com/phoban01/ocm-v2/api/v2"
@@ -13,13 +13,13 @@ type accessor struct {
 
 var _ v2.Access = (*accessor)(nil)
 
-var MediaType = "custom-blob"
+var MediaType = "helm"
 
 func init() {
 	provider.Register(&accessor{})
 }
 
-func FromFile(path string) (v2.Access, error) {
+func FromRepository(path string) (v2.Access, error) {
 	return &accessor{filepath: path}, nil
 }
 

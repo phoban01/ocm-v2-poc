@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	v2 "github.com/phoban01/ocm-v2/pkg/v2"
-	"github.com/phoban01/ocm-v2/pkg/v2/mutate"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/mutate"
 )
 
 func (r *repository) Write(component v2.Component) error {

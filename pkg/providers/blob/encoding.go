@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	v2 "github.com/phoban01/ocm-v2/pkg/v2"
-	"github.com/phoban01/ocm-v2/pkg/v2/types"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
 func (a *accessor) Decode(resource types.Resource) (v2.Access, error) {

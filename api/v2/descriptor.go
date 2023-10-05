@@ -1,6 +1,6 @@
 package v2
 
-import "github.com/phoban01/ocm-v2/pkg/v2/types"
+import "github.com/phoban01/ocm-v2/api/v2/types"
 
 // Descriptor represents the Component Descriptor in a structured way.
 type Descriptor struct {

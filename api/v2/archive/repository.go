@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	v2 "github.com/phoban01/ocm-v2/pkg/v2"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
 )
 
 type repository struct {

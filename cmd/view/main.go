@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/phoban01/ocm-v2/api/v2/archive"
 	_ "github.com/phoban01/ocm-v2/pkg/providers/blob"
 	_ "github.com/phoban01/ocm-v2/pkg/providers/oci"
-	"github.com/phoban01/ocm-v2/pkg/v2/archive"
 )
 
 func main() {

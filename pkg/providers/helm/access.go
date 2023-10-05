@@ -1,4 +1,4 @@
-package blob
+package helm
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 )
 
 func (a *accessor) Type() v2.AccessType {
-	return v2.AccessType("localBlob/v1")
+	return v2.AccessType("helmChart/v1")
 }
 
 func (a *accessor) MediaType() string {
