@@ -1,4 +1,4 @@
-package main
+package myblob
 
 import (
 	"crypto/sha256"
@@ -8,6 +8,7 @@ import (
 	"os"
 
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
+	"github.com/phoban01/ocm-v2/pkg/v2/provider"
 	"github.com/phoban01/ocm-v2/pkg/v2/types"
 )
 
@@ -18,12 +19,18 @@ type accessor struct {
 
 var _ v2.Access = (*accessor)(nil)
 
+var MediaType = "custom-blob"
+
+func Use() {
+	provider.Register(&accessor{})
+}
+
 func (a *accessor) Type() v2.AccessType {
 	return v2.AccessType("localBlob/v1")
 }
 
 func (a *accessor) MediaType() string {
-	return "custom-blob"
+	return MediaType
 }
 
 func (a *accessor) Labels() map[string]string {

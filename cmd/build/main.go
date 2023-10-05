@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/phoban01/ocm-v2/pkg/providers/myblob"
+	"github.com/phoban01/ocm-v2/pkg/providers/myoci"
 	v2 "github.com/phoban01/ocm-v2/pkg/v2"
 	"github.com/phoban01/ocm-v2/pkg/v2/archive"
 	"github.com/phoban01/ocm-v2/pkg/v2/blob"
@@ -13,6 +15,9 @@ import (
 )
 
 func main() {
+	myoci.Use()
+	myblob.Use()
+
 	// create a new component
 	cmp := builder.New("ocm.software/test", "v1.0.0", "acme.org")
 
@@ -24,9 +29,9 @@ func main() {
 	// create resources
 	resources := []v2.Resource{
 		blob.FromBytes("data", data),
-		blob.FromFile("config", "config.yaml", blob.WithMediaType("custom-blob")),
+		blob.FromFile("config", "config.yaml", blob.WithMediaType(myblob.MediaType)),
 		oci.Resource("web-server", "docker.io/nginx:1.25.2"),
-		oci.Resource("redis", "docker.io/redis:latest"),
+		oci.Resource("redis", "docker.io/redis:latest", oci.WithMediaType(myoci.MediaType)),
 	}
 
 	// add the resource to the component

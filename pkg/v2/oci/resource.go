@@ -9,17 +9,29 @@ import (
 
 type image struct {
 	name   string
-	access v2.Access
+	access *access
 }
 
 var _ v2.Resource = (*image)(nil)
 
 const Type types.ResourceType = "ociImage"
 
-func Resource(name, ref string) v2.Resource {
-	return &image{name: name, access: &access{
+type Option func(*image)
+
+func WithMediaType(s string) Option {
+	return func(b *image) {
+		b.access.mediaType = s
+	}
+}
+
+func Resource(name, ref string, opts ...Option) v2.Resource {
+	i := &image{name: name, access: &access{
 		ref: ref,
 	}}
+	for _, o := range opts {
+		o(i)
+	}
+	return i
 }
 
 func (f *image) Name() string {

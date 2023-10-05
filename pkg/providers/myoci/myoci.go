@@ -1,4 +1,4 @@
-package main
+package myoci
 
 import (
 	"encoding/json"
@@ -23,7 +23,9 @@ type access struct {
 
 var _ v2.Access = (*access)(nil)
 
-func init() {
+var MediaType = "application/vnd.custom.image"
+
+func Use() {
 	provider.Register(&access{})
 }
 
@@ -32,7 +34,7 @@ func (a *access) Type() v2.AccessType {
 }
 
 func (a *access) MediaType() string {
-	return "application/vnd.docker.image"
+	return MediaType
 }
 
 func (a *access) Labels() map[string]string {

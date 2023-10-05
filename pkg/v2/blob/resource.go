@@ -12,9 +12,9 @@ type blob struct {
 	access *access
 }
 
-const Type types.ResourceType = "blob"
-
 var _ v2.Resource = (*blob)(nil)
+
+const Type types.ResourceType = "blob"
 
 type Option func(*blob)
 

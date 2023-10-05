@@ -17,8 +17,9 @@ import (
 )
 
 type access struct {
-	image v1.Image
-	ref   string
+	image     v1.Image
+	ref       string
+	mediaType string
 }
 
 var _ v2.Access = (*access)(nil)
@@ -32,6 +33,9 @@ func (a *access) Type() v2.AccessType {
 }
 
 func (a *access) MediaType() string {
+	if a.mediaType != "" {
+		return a.mediaType
+	}
 	return "application/vnd.docker.image"
 }
 

@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/phoban01/ocm-v2/pkg/providers/myblob"
+	"github.com/phoban01/ocm-v2/pkg/providers/myoci"
 	"github.com/phoban01/ocm-v2/pkg/v2/archive"
-	"github.com/phoban01/ocm-v2/pkg/v2/provider"
 )
 
 func main() {
-	provider.Register(&accessor{})
+	myoci.Use()
+	myblob.Use()
 
 	ctf, err := archive.Repository("test-ctf")
 	if err != nil {
