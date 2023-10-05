@@ -2,7 +2,10 @@ module github.com/phoban01/ocm-v2
 
 go 1.21.0
 
-require github.com/google/go-containerregistry v0.16.1
+require (
+	github.com/google/go-containerregistry v0.16.1
+	github.com/phoban01/ocm-v2/api v0.0.0-20231005193634-d77b6e7b8b5e
+)
 
 require (
 	github.com/containerd/stargz-snapshotter/estargz v0.14.3 // indirect
