@@ -8,7 +8,6 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
 	"github.com/phoban01/ocm-v2/providers/blob"
-	"github.com/phoban01/ocm-v2/providers/helm"
 	"github.com/phoban01/ocm-v2/providers/oci"
 )
 
@@ -36,21 +35,21 @@ func main() {
 	}, imageAcc, builder.Deferrable(true))
 
 	// define helm resource
-	helmAcc, err := helm.FromChart("nginx-stable/nginx-ingress", "0.17.1")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	chart := builder.NewResource(types.ObjectMeta{
-		Name: "chart",
-		Type: types.HelmChart,
-	}, helmAcc)
+	// helmAcc, err := helm.FromChart("nginx-stable/nginx-ingress", "0.17.1")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	//
+	// chart := builder.NewResource(types.ObjectMeta{
+	// 	Name: "chart",
+	// 	Type: types.HelmChart,
+	// }, helmAcc)
 
 	// create a new component
 	cmp := builder.New("ocm.software/test", "v1.0.0", "acme.org")
 
 	// add the resources to the component
-	cmp = mutate.WithResources(cmp, config, image, chart)
+	cmp = mutate.WithResources(cmp, config, image)
 
 	// setup the repository
 	repo, err := archive.Repository("transport-archive")
