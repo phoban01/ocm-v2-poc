@@ -1,7 +1,6 @@
 package helm
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"io"
@@ -9,6 +8,9 @@ import (
 
 	v2 "github.com/phoban01/ocm-v2/api/v2"
 	"github.com/phoban01/ocm-v2/api/v2/types"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/downloader"
+	"helm.sh/helm/v3/pkg/getter"
 )
 
 func (a *accessor) Type() v2.AccessType {
@@ -24,10 +26,18 @@ func (a *accessor) Labels() map[string]string {
 }
 
 func (a *accessor) Data() (io.ReadCloser, error) {
-	if a.data != nil {
-		return io.NopCloser(bytes.NewReader(a.data)), nil
+	dl := &downloader.ChartDownloader{
+		Out:     os.Stderr,
+		Getters: getter.All(&cli.EnvSettings{}),
 	}
-	return os.Open(a.filepath)
+	tmp, err := os.MkdirTemp(os.TempDir(), "ocm-test-v2-*")
+	if err != nil {
+		return nil, err
+	}
+	if _, _, err := dl.DownloadTo(a.chart, a.version, tmp); err != nil {
+		return nil, err
+	}
+	return os.Open(tmp)
 }
 
 func (a *accessor) Digest() (*types.Digest, error) {
@@ -51,5 +61,5 @@ func (a *accessor) Digest() (*types.Digest, error) {
 }
 
 func (a *accessor) WithLocation(p string) {
-	a.filepath = p
+	// a.filepath = p
 }

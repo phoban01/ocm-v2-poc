@@ -6,9 +6,9 @@ import (
 )
 
 type accessor struct {
-	data     []byte
-	filepath string
-	labels   map[string]string
+	chart   string
+	version string
+	labels  map[string]string
 }
 
 var _ v2.Access = (*accessor)(nil)
@@ -19,10 +19,6 @@ func init() {
 	provider.Register(&accessor{})
 }
 
-func FromRepository(path string) (v2.Access, error) {
-	return &accessor{filepath: path}, nil
-}
-
-func FromBytes(data []byte) (v2.Access, error) {
-	return &accessor{data: data}, nil
+func FromChart(chart, version string) (v2.Access, error) {
+	return &accessor{chart: chart, version: version}, nil
 }

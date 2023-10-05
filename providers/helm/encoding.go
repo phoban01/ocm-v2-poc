@@ -17,9 +17,10 @@ func (a *accessor) Decode(resource types.Resource) (v2.Access, error) {
 
 func (a *accessor) MarshalJSON() ([]byte, error) {
 	result := map[string]string{
-		"localReference": a.filepath,
-		"type":           string(a.Type()),
-		"mediaType":      a.MediaType(),
+		"chart":     a.chart,
+		"version":   a.version,
+		"type":      string(a.Type()),
+		"mediaType": a.MediaType(),
 	}
 	return json.Marshal(result)
 }
@@ -29,6 +30,7 @@ func (a *accessor) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
-	a.filepath = obj["localReference"]
+	a.chart = obj["chart"]
+	a.version = obj["version"]
 	return nil
 }
