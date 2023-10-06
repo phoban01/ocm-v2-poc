@@ -25,27 +25,35 @@ import (
 )
 
 func main() {
-	// define config resource
-	configFile, err := blob.FromFile("config.yaml")
+	// define config metadata
+	configMeta := types.ObjectMeta{
+		Name: "config",
+		Type: types.Blob,
+	}
+
+	// get the config blob accessor
+	configAccess, err := blob.FromFile("config.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	config := builder.NewResource(types.ObjectMeta{
-		Name: "config",
-		Type: types.Blob,
-	}, configFile)
+	// define the config resource
+	config := builder.NewResource(configMeta, configAccess)
 
-	// define image resource
+	// define the image metadata
+	imageMeta := types.ObjectMeta{
+		Name: "image",
+		Type: types.OCIImage,
+	}
+
+	// get the oci image
 	imageAcc, err := oci.FromImage("docker.io/redis:latest")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	image := builder.NewResource(types.ObjectMeta{
-		Name: "image",
-		Type: types.OCIImage,
-	}, imageAcc, builder.Deferrable(true))
+	// define the image resource, (builder.Deferrable means the resource does not need to be read at build time)
+	image := builder.NewResource(imageMeta, imageAcc, builder.Deferrable(true))
 
 	// create a new component
 	cmp := builder.New("ocm.software/test", "v1.0.0", "acme.org")
