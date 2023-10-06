@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	ctf, err := archive.Repository("test-ctf")
+	ctf, err := archive.Repository("transport-archive")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -23,17 +23,6 @@ func New(name, version, provider string) v2.Component {
 }
 
 func (c *component) compute() error {
-	// desc, err := c.Descriptor()
-	// if err != nil {
-	// 	return err
-	// }
-	// for _, res := range desc.Resources {
-	// 	dr, err := decode.Resource(res)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	c.resources = append(c.resources, dr)
-	// }
 	return nil
 }
 
