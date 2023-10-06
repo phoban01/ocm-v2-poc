@@ -39,7 +39,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// define the image resource, (builder.Deferrable means the resource does not need to be read at build time)
+	// define the image resource
+	// builder.Deferrable means the resource does not need to be read at build time
 	image := builder.NewResource(imageMeta, imageAcc, builder.Deferrable(true))
 
 	// create a new component
