@@ -4,8 +4,7 @@ go 1.21.0
 
 require (
 	github.com/phoban01/ocm-v2/api v0.0.0-20231005194606-9910b76d3aa5
-	github.com/phoban01/ocm-v2/providers/blob v0.0.0-20231005194325-52d9113e5ec2
-	github.com/phoban01/ocm-v2/providers/helm v0.0.0-20231005194606-9910b76d3aa5
+	github.com/phoban01/ocm-v2/providers/blob v1.0.0
 	github.com/phoban01/ocm-v2/providers/oci v0.0.0-20231005194325-52d9113e5ec2
 )
 

@@ -27,10 +27,8 @@ github.com/opencontainers/image-spec v1.1.0-rc5 h1:Ygwkfw9bpDvs+c9E34SdgGOj41dX/
 github.com/opencontainers/image-spec v1.1.0-rc5/go.mod h1:X4pATf0uXsnn3g5aiGIsVnJBR4mxhKzfwmvK/B2NTm8=
 github.com/phoban01/ocm-v2/api v0.0.0-20231005194606-9910b76d3aa5 h1:iI7WDS4xZLvaAp66zeDn2495Lw424XaZatyOdQNUsB8=
 github.com/phoban01/ocm-v2/api v0.0.0-20231005194606-9910b76d3aa5/go.mod h1:B42sS/BKBNKThrxGnM1lNk+pIVoBGkwYs1cJHsvJP7A=
-github.com/phoban01/ocm-v2/providers/blob v0.0.0-20231005194325-52d9113e5ec2 h1:dbFXmtM2OaFnMTG5qFU+HVTZ/N+WHdAk+QphF/sFGZY=
-github.com/phoban01/ocm-v2/providers/blob v0.0.0-20231005194325-52d9113e5ec2/go.mod h1:Z/1X4S3ThKsrjAbnIOr4uOLmmsi2jBgwlKfYlW9wmdA=
-github.com/phoban01/ocm-v2/providers/helm v0.0.0-20231005194606-9910b76d3aa5 h1:US9CzkL6TCStGgNCQtG7llk3X1mxgytH4KT2Cu5KChE=
-github.com/phoban01/ocm-v2/providers/helm v0.0.0-20231005194606-9910b76d3aa5/go.mod h1:RKljuSW50bXy+WbUKVfpqEd0BNppveJNz3h0msK15zE=
+github.com/phoban01/ocm-v2/providers/blob v1.0.0 h1:g2OZ62OR2PyDdNYGiPEAoX4KnQ4LWtMkmDoTFZqXWnA=
+github.com/phoban01/ocm-v2/providers/blob v1.0.0/go.mod h1:Z/1X4S3ThKsrjAbnIOr4uOLmmsi2jBgwlKfYlW9wmdA=
 github.com/phoban01/ocm-v2/providers/oci v0.0.0-20231005194325-52d9113e5ec2 h1:iVR1372W5SPGwO922+Lb+HQKi0O56V1d9mOQ+50i9+M=
 github.com/phoban01/ocm-v2/providers/oci v0.0.0-20231005194325-52d9113e5ec2/go.mod h1:izDMjgGkSIkff4djVawK3NoEnY3xCUPPHt8iNVwwS24=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
