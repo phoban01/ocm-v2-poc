@@ -1,14 +1,10 @@
 package provider
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
 
-	v2 "github.com/phoban01/ocm-v2/api/v2"
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
@@ -18,47 +14,18 @@ func Register(p Provider) error {
 	if p.Type() == "" {
 		return errors.New("type not specified")
 	}
-	if p.MediaType() == "" {
-		return errors.New("media-type not specified")
-	}
-	hv := UniqueIDFor(string(p.Type()), p.MediaType(), p.Labels())
-	providers[hv] = p
+	providers[p.Type()] = p
 	return nil
 }
 
-func lookup(resource types.Resource) (v2.Access, error) {
+func lookup(resource types.Resource) (Provider, error) {
 	acc := make(map[string]any)
 	if err := json.Unmarshal(resource.Access, &acc); err != nil {
 		return nil, err
 	}
-	hv := UniqueIDFor(acc["type"].(string), acc["mediaType"].(string), nil)
-	p, ok := providers[hv]
+	p, ok := providers[acc["type"].(string)]
 	if !ok {
-		return nil, fmt.Errorf("no provider registered for id: %s", hv)
+		return nil, fmt.Errorf("no provider registered for id: %s", acc["type"])
 	}
-	return p.Decode(resource)
-}
-
-func UniqueIDFor(artifactType, mediaType string, labels map[string]string) string {
-	id := fmt.Sprintf("%s:%s", artifactType, mediaType)
-	if labels != nil {
-		return id + fmt.Sprintf(":%s", hashMap(labels))
-	}
-	return id
-}
-
-func hashMap(m map[string]string) string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	h := sha256.New()
-	for _, k := range keys {
-		h.Write([]byte(k))
-		h.Write([]byte(m[k]))
-	}
-
-	return hex.EncodeToString(h.Sum(nil))
+	return p, nil
 }

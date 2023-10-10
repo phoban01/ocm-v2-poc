@@ -1,4 +1,4 @@
-package archive
+package filesystem
 
 import (
 	"fmt"
@@ -21,9 +21,8 @@ func Repository(path string) (v2.Repository, error) {
 	return &repository{path: p}, nil
 }
 
-func (r *repository) Context() *v2.RepositoryContext {
-	return &v2.RepositoryContext{
-		Type: "ocm.repository/bundle",
-		URL:  fmt.Sprintf("file://%s", r.path),
+func (r *repository) Context() v2.RepositoryContext {
+	return &repositoryContext{
+		url: fmt.Sprintf("file://%s", r.path),
 	}
 }

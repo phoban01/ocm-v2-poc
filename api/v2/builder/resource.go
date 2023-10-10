@@ -57,8 +57,8 @@ func (r *resource) Deferrable() bool {
 	return r.deferrable
 }
 
-func (r *resource) Access() v2.Access {
-	return r.access
+func (r *resource) Access() (v2.Access, error) {
+	return r.access, nil
 }
 
 func (r *resource) Digest() (*types.Digest, error) {
@@ -69,7 +69,11 @@ func (r *resource) Digest() (*types.Digest, error) {
 }
 
 func (r *resource) MarshalJSON() ([]byte, error) {
-	access, err := json.Marshal(r.Access())
+	data, err := r.Access()
+	if err != nil {
+		return nil, err
+	}
+	access, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
@@ -96,9 +100,4 @@ func (r *resource) UnmarshalJSON(data []byte) error {
 	r.resourceType = res.Type
 	r.digest = res.Digest
 	return nil
-}
-
-func (r *resource) WithLocation(p string) v2.Resource {
-	r.access.WithLocation(p)
-	return r
 }

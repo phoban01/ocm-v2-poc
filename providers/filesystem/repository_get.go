@@ -1,15 +1,19 @@
-package archive
+package filesystem
 
 import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 
 	v2 "github.com/phoban01/ocm-v2/api/v2"
 )
 
 func (r *repository) Get(name, version string) (v2.Component, error) {
-	f, err := os.ReadFile(filepath.Join(r.path, "component-descriptor.json"))
+	loc := r.Context().Location()
+	f, err := os.ReadFile(
+		filepath.Join(strings.TrimPrefix(loc, "file://"), "component-descriptor.json"),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -20,6 +24,7 @@ func (r *repository) Get(name, version string) (v2.Component, error) {
 	}
 
 	return &component{
+		context:    r.Context(),
 		descriptor: desc,
 	}, nil
 }

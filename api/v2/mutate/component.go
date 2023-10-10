@@ -58,7 +58,7 @@ func (c *component) compute() error {
 	}
 
 	for _, add := range c.addRepository {
-		sctx = append(sctx, *add.Context())
+		sctx = append(sctx, add.Context())
 	}
 
 	c.storageContext = sctx
@@ -72,27 +72,32 @@ func (c *component) compute() error {
 
 	if updatedResources {
 		for _, r := range c.resources {
-			acc, err := json.Marshal(r.Access())
+			acc, err := r.Access()
 			if err != nil {
 				return err
 			}
+
+			accData, err := json.Marshal(acc)
+			if err != nil {
+				return err
+			}
+
 			dig, err := r.Digest()
 			if err != nil {
 				return err
 			}
+
 			re := types.Resource{
 				ObjectMeta: types.ObjectMeta{
 					Name: r.Name(),
 					Type: r.Type(),
 				},
-				Access: acc,
+				Access: accData,
 				Digest: dig,
 			}
 			c.descriptor.Resources = append(c.descriptor.Resources, re)
 		}
 	}
-
-	// c.descriptor.Signatures = c.signatures
 
 	c.descriptor.RepositoryContext = c.storageContext
 

@@ -6,18 +6,20 @@ import (
 	"io"
 	"os"
 
-	v2 "github.com/phoban01/ocm-v2/api/v2"
 	"github.com/phoban01/ocm-v2/api/v2/types"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/downloader"
 	"helm.sh/helm/v3/pkg/getter"
 )
 
-func (a *accessor) Type() v2.AccessType {
-	return v2.AccessType("helmChart/v1")
+func (a *accessor) Type() string {
+	return AccessType
 }
 
 func (a *accessor) MediaType() string {
+	if a.mediaType != "" {
+		return a.mediaType
+	}
 	return MediaType
 }
 
@@ -27,17 +29,22 @@ func (a *accessor) Labels() map[string]string {
 
 func (a *accessor) Data() (io.ReadCloser, error) {
 	dl := &downloader.ChartDownloader{
-		Out:     os.Stderr,
-		Getters: getter.All(&cli.EnvSettings{}),
+		Out:              os.Stderr,
+		Getters:          getter.All(&cli.EnvSettings{}),
+		RepositoryCache:  "/home/piaras/.cache/helm/repository",
+		RepositoryConfig: "/home/piaras/.config/helm/repositories.yaml",
 	}
+
 	tmp, err := os.MkdirTemp(os.TempDir(), "ocm-test-v2-*")
 	if err != nil {
 		return nil, err
 	}
-	if _, _, err := dl.DownloadTo(a.chart, a.version, tmp); err != nil {
+
+	dst, _, err := dl.DownloadTo(a.chart, a.version, tmp)
+	if err != nil {
 		return nil, err
 	}
-	return os.Open(tmp)
+	return os.Open(dst)
 }
 
 func (a *accessor) Digest() (*types.Digest, error) {
@@ -58,8 +65,4 @@ func (a *accessor) Digest() (*types.Digest, error) {
 		NormalisationAlgorithm: "json/v1",
 		Value:                  fmt.Sprintf("%x", hash.Sum(nil)),
 	}, nil
-}
-
-func (a *accessor) WithLocation(p string) {
-	// a.filepath = p
 }

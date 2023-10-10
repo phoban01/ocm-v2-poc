@@ -6,12 +6,10 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
-type AccessType string
-
 type Access interface {
 	Labels() map[string]string
 
-	Type() AccessType
+	Type() string
 
 	MediaType() string
 
@@ -22,6 +20,4 @@ type Access interface {
 	MarshalJSON() ([]byte, error)
 
 	UnmarshalJSON([]byte) error
-
-	WithLocation(string)
 }

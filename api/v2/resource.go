@@ -6,9 +6,9 @@ import (
 
 type Resource interface {
 	ObjectMeta
-	Transporter
+	Transferable
 	Type() types.ResourceType
-	Access() Access
+	Access() (Access, error)
 	Digest() (*types.Digest, error)
 }
 
@@ -17,8 +17,7 @@ type ObjectMeta interface {
 	Labels() map[string]string
 }
 
-type Transporter interface {
-	WithLocation(string) Resource
+type Transferable interface {
 	Deferrable() bool
 	MarshalJSON() ([]byte, error)
 	UnmarshalJSON([]byte) error

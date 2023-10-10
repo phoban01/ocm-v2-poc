@@ -3,54 +3,41 @@ package main
 import (
 	"log"
 
-	"github.com/phoban01/ocm-v2/api/v2/archive"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
 	"github.com/phoban01/ocm-v2/api/v2/builder"
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
-	"github.com/phoban01/ocm-v2/providers/blob"
+	"github.com/phoban01/ocm-v2/providers/filesystem"
+	"github.com/phoban01/ocm-v2/providers/helm"
 	"github.com/phoban01/ocm-v2/providers/oci"
 )
 
 func main() {
-	// define config metadata
-	configMeta := types.ObjectMeta{
-		Name: "config",
-		Type: types.Blob,
-	}
-
-	// get the config blob accessor
-	configAccess, err := blob.FromFile("config.yaml")
+	config, err := NewFileResource("config", "config.yaml", "application/x-yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// define the config resource
-	config := builder.NewResource(configMeta, configAccess)
-
-	// define the image metadata
-	imageMeta := types.ObjectMeta{
-		Name: "image",
-		Type: types.OCIImage,
-	}
-
-	// get the oci image
-	imageAcc, err := oci.FromImage("docker.io/redis:latest")
+	image, err := NewImageResource("redis", "docker.io/redis:latest")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// define the image resource
-	// builder.Deferrable means the resource does not need to be read at build time
-	image := builder.NewResource(imageMeta, imageAcc, builder.Deferrable(true))
+	chart, err := NewChartResource("chart", "nginx-stable/nginx-ingress", "0.17.1")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resources := []v2.Resource{config, image, chart}
 
 	// create a new component
 	cmp := builder.New("ocm.software/test", "v1.0.0", "acme.org")
 
 	// add the resources to the component
-	cmp = mutate.WithResources(cmp, config, image)
+	cmp = mutate.WithResources(cmp, resources...)
 
 	// setup the repository
-	repo, err := archive.Repository("transport-archive")
+	repo, err := filesystem.Repository("transport-archive")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,4 +46,46 @@ func main() {
 	if err := repo.Write(cmp); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func NewFileResource(name, path, mediaType string) (v2.Resource, error) {
+	meta := types.ObjectMeta{
+		Name: name,
+		Type: types.Blob,
+	}
+
+	access, err := filesystem.FromFile(path, filesystem.WithMediaType(mediaType))
+	if err != nil {
+		return nil, err
+	}
+	// define the config resource
+	return builder.NewResource(meta, access), nil
+}
+
+func NewImageResource(name, ref string) (v2.Resource, error) {
+	meta := types.ObjectMeta{
+		Name: name,
+		Type: types.OCIImage,
+	}
+
+	access, err := oci.FromImage(ref)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.NewResource(meta, access, builder.Deferrable(true)), nil
+}
+
+func NewChartResource(name, ref, version string) (v2.Resource, error) {
+	meta := types.ObjectMeta{
+		Name: name,
+		Type: types.HelmChart,
+	}
+
+	access, err := helm.FromChart(ref, version)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.NewResource(meta, access), nil
 }

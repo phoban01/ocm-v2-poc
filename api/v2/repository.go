@@ -1,15 +1,23 @@
 package v2
 
 type Repository interface {
-	Context() *RepositoryContext
+	RepositoryStorage
 
+	Context() RepositoryContext
 	List() ([]Component, error)
 	Get(name string, version string) (Component, error)
 	Write(Component) error
 	Delete() error
 }
 
-type RepositoryContext struct {
-	URL  string `json:"url"`
-	Type string `json:"type"`
+type RepositoryStorage interface {
+	ReadBlob() (Access, error)
+	WriteBlob(Access) error
+}
+
+type RepositoryContext interface {
+	Location() string
+	Type() string
+	MarshalJSON() ([]byte, error)
+	UnmarshalJSON([]byte) error
 }

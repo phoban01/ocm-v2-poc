@@ -1,4 +1,4 @@
-package archive
+package filesystem
 
 import (
 	"encoding/json"
@@ -49,16 +49,29 @@ func (r *repository) Write(component v2.Component) error {
 		}
 		defer f.Close()
 
-		reader, err := item.Access().Data()
+		acc, err := item.Access()
+		if err != nil {
+			return err
+		}
+
+		reader, err := acc.Data()
 		if err != nil {
 			return err
 		}
 		defer reader.Close()
+
 		if _, err := io.Copy(f, reader); err != nil {
 			return err
 		}
 
-		visitedResources = append(visitedResources, item.WithLocation(p))
+		newAccess, err := FromFile(p, WithMediaType(acc.MediaType()))
+		if err != nil {
+			return err
+		}
+
+		item = mutate.WithAccess(item, newAccess)
+
+		visitedResources = append(visitedResources, item)
 	}
 
 	component = mutate.WithResources(component, visitedResources...)

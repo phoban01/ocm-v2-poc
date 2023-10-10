@@ -8,7 +8,7 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
-func (a *accessor) Decode(resource types.Resource) (v2.Access, error) {
+func (a *accessor) Decode(ctx v2.RepositoryContext, resource types.Resource) (v2.Access, error) {
 	if err := json.Unmarshal(resource.Access, a); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal access: %w", err)
 	}
@@ -30,5 +30,6 @@ func (a *accessor) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	a.ref = obj["imageReference"]
+	a.mediaType = obj["mediaType"]
 	return nil
 }

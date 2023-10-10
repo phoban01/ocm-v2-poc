@@ -6,15 +6,17 @@ import (
 )
 
 type resource struct {
-	base          v2.Resource
-	updatedAccess v2.Access
-	access        v2.Access
+	base      v2.Resource
+	access    v2.Access
+	newAccess v2.Access
 }
 
 var _ v2.Resource = (*resource)(nil)
 
 func (r *resource) compute() error {
-	r.access = r.updatedAccess
+	if r.newAccess != nil {
+		r.access = r.newAccess
+	}
 	return nil
 }
 
@@ -22,13 +24,15 @@ func (r *resource) Name() string {
 	return r.base.Name()
 }
 
-func (r *resource) Access() v2.Access {
-	r.compute()
-	return r.access
+func (r *resource) Access() (v2.Access, error) {
+	if err := r.compute(); err != nil {
+		return nil, err
+	}
+	return r.access, nil
 }
 
 func (r *resource) Digest() (*types.Digest, error) {
-	r.compute()
+	// r.compute()
 	return r.access.Digest()
 }
 
@@ -38,11 +42,6 @@ func (r *resource) Type() types.ResourceType {
 
 func (r *resource) Labels() map[string]string {
 	return r.base.Labels()
-}
-
-func (r *resource) WithLocation(p string) v2.Resource {
-	r.access.WithLocation(p)
-	return r
 }
 
 func (r *resource) Deferrable() bool {

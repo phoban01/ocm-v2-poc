@@ -7,13 +7,17 @@ import (
 )
 
 type accessor struct {
-	image v1.Image
-	ref   string
+	image     v1.Image
+	ref       string
+	mediaType string
 }
 
 var _ v2.Access = (*accessor)(nil)
 
-var MediaType = "application/vnd.docker.image"
+var (
+	AccessType = "ociArtifact"
+	MediaType  = "application/vnd.docker.image"
+)
 
 func init() {
 	provider.Register(&accessor{})

@@ -7,5 +7,5 @@ import (
 
 type Provider interface {
 	v2.Access
-	Decode(resource types.Resource) (v2.Access, error)
+	Decode(ctx v2.RepositoryContext, resource types.Resource) (v2.Access, error)
 }

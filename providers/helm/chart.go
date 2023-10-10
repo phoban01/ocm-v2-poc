@@ -6,14 +6,18 @@ import (
 )
 
 type accessor struct {
-	chart   string
-	version string
-	labels  map[string]string
+	chart     string
+	version   string
+	mediaType string
+	labels    map[string]string
 }
 
 var _ v2.Access = (*accessor)(nil)
 
-var MediaType = "helm"
+var (
+	AccessType = "helmChart/v1"
+	MediaType  = "application/tar+gzip"
+)
 
 func init() {
 	provider.Register(&accessor{})

@@ -4,18 +4,17 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/phoban01/ocm-v2/api/v2/archive"
-	_ "github.com/phoban01/ocm-v2/providers/blob"
+	"github.com/phoban01/ocm-v2/providers/filesystem"
 	_ "github.com/phoban01/ocm-v2/providers/oci"
 )
 
 func main() {
-	ctf, err := archive.Repository("transport-archive")
+	repo, err := filesystem.Repository("transport-archive")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cmp, err := ctf.Get("ocm.software/test", "v1.0.0")
+	cmp, err := repo.Get("ocm.software/test", "v1.0.0")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,10 +31,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		table = append(
-			table,
-			[]string{string(v.Type()), v.Name(), v.Access().MediaType(), dig.Value},
-		)
+
+		acc, err := v.Access()
+		if err != nil {
+			log.Fatal(err)
+		}
+		row := []string{string(v.Type()), v.Name(), acc.MediaType(), dig.Value}
+		table = append(table, row)
 	}
 
 	printTable(table)

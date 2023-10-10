@@ -1,4 +1,4 @@
-package archive
+package filesystem
 
 import (
 	v2 "github.com/phoban01/ocm-v2/api/v2"
@@ -7,6 +7,7 @@ import (
 )
 
 type component struct {
+	context    v2.RepositoryContext
 	descriptor v2.Descriptor
 	resources  []v2.Resource
 	signatures []v2.Signature
@@ -15,8 +16,8 @@ type component struct {
 var _ v2.Component = (*component)(nil)
 
 func (c *component) compute() error {
-	for _, res := range c.descriptor.Resources {
-		dr, err := provider.GetResource(res)
+	for _, r := range c.descriptor.Resources {
+		dr, err := provider.GetResource(c.context, r)
 		if err != nil {
 			return err
 		}

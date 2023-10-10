@@ -8,15 +8,30 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/mutate"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
-	v2 "github.com/phoban01/ocm-v2/api/v2"
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
-func (a *accessor) Type() v2.AccessType {
-	return v2.AccessType("ociArtifact")
+func (a *accessor) compute() error {
+	ref, err := name.ParseReference(a.ref)
+	if err != nil {
+		return err
+	}
+	img, err := remote.Image(ref, remote.WithAuthFromKeychain(authn.DefaultKeychain))
+	if err != nil {
+		return err
+	}
+	a.image = img
+	return nil
+}
+
+func (a *accessor) Type() string {
+	return AccessType
 }
 
 func (a *accessor) MediaType() string {
+	if a.mediaType != "" {
+		return a.mediaType
+	}
 	return MediaType
 }
 
@@ -46,21 +61,4 @@ func (a *accessor) Digest() (*types.Digest, error) {
 		NormalisationAlgorithm: "json/v1",
 		Value:                  strings.TrimPrefix(hash.String(), "sha256:"),
 	}, nil
-}
-
-func (a *accessor) WithLocation(p string) {
-	a.ref = p
-}
-
-func (a *accessor) compute() error {
-	ref, err := name.ParseReference(a.ref)
-	if err != nil {
-		return err
-	}
-	img, err := remote.Image(ref, remote.WithAuthFromKeychain(authn.DefaultKeychain))
-	if err != nil {
-		return err
-	}
-	a.image = img
-	return nil
 }
