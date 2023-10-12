@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
 func (r *repository) Get(componentName, version string) (v2.Component, error) {
@@ -54,7 +55,7 @@ func (r *repository) Get(componentName, version string) (v2.Component, error) {
 		return nil, err
 	}
 
-	desc := v2.Descriptor{}
+	desc := types.Descriptor{}
 	if err := json.Unmarshal(layerData, &desc); err != nil {
 		return nil, err
 	}

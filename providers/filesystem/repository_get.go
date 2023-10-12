@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
 func (r *repository) Get(name, version string) (v2.Component, error) {
@@ -18,7 +19,7 @@ func (r *repository) Get(name, version string) (v2.Component, error) {
 		return nil, err
 	}
 
-	desc := v2.Descriptor{}
+	desc := types.Descriptor{}
 	if err := json.Unmarshal(f, &desc); err != nil {
 		return nil, err
 	}

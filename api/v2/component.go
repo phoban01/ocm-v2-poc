@@ -1,5 +1,7 @@
 package v2
 
+import "github.com/phoban01/ocm-v2/api/v2/types"
+
 type Component interface {
 	// Version returns the version string of the component.
 	Version() string
@@ -8,10 +10,10 @@ type Component interface {
 	RepositoryContext() ([]RepositoryContext, error)
 
 	// Provider returns the Provider metadata for te Component.
-	Provider() (*Provider, error)
+	Provider() (*types.Provider, error)
 
 	// Descriptor returns the Descriptor for the component.
-	Descriptor() (*Descriptor, error)
+	Descriptor() (*types.Descriptor, error)
 
 	// Resources returns the list of resources that the component contains.
 	Resources() ([]Resource, error)

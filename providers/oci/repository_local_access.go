@@ -15,7 +15,7 @@ import (
 
 type localAccess struct {
 	repository v2.Repository
-	desc       v2.Descriptor
+	desc       types.Descriptor
 	data       func() (io.ReadCloser, error)
 	mediaType  string
 	digest     types.Digest
@@ -26,7 +26,12 @@ var _ v2.Access = (*localAccess)(nil)
 
 func (a *localAccess) compute() error {
 	registry := strings.TrimPrefix(a.repository.Context().Location(), "oci://")
-	url := fmt.Sprintf("%s/component-descriptors/%s@%s", registry, a.desc.Name, a.digest.Value)
+	url := fmt.Sprintf(
+		"%s/component-descriptors/%s@%s",
+		registry,
+		a.desc.ObjectMeta.Name,
+		a.digest.Value,
+	)
 	ref, err := name.NewDigest(url)
 	if err != nil {
 		return err

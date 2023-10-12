@@ -14,6 +14,7 @@ type resource struct {
 	resourceType types.ResourceType
 	labels       map[string]string
 	digest       *types.Digest
+	version      string
 }
 
 var _ v2.Resource = (*resource)(nil)
@@ -27,7 +28,12 @@ func Deferrable(value bool) Option {
 }
 
 func NewResource(meta types.ObjectMeta, access v2.Access, opts ...Option) v2.Resource {
-	r := &resource{name: meta.Name, resourceType: meta.Type, access: access}
+	r := &resource{
+		name:         meta.Name,
+		resourceType: meta.Type,
+		version:      meta.Version,
+		access:       access,
+	}
 	for _, o := range opts {
 		o(r)
 	}
@@ -37,12 +43,18 @@ func NewResource(meta types.ObjectMeta, access v2.Access, opts ...Option) v2.Res
 func DecodeResource(r types.Resource) v2.Resource {
 	return &resource{
 		name:         r.Name,
+		version:      r.Version,
+		labels:       r.Labels,
 		resourceType: r.Type,
 	}
 }
 
 func (r *resource) Name() string {
 	return r.name
+}
+
+func (r *resource) Version() string {
+	return r.version
 }
 
 func (r *resource) Type() types.ResourceType {

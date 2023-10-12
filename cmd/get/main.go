@@ -11,12 +11,12 @@ import (
 )
 
 func main() {
-	repo, err := oci.Repository("ghcr.io/phoban01/mytest")
+	repo, err := oci.Repository("ghcr.io/phoban01")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cmp, err := repo.Get("ocm.software/piaras", "v5.0.0")
+	cmp, err := repo.Get("ocm.software/v2/server", "v1.0.0")
 	if err != nil {
 		log.Fatal(err)
 	}

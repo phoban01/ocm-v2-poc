@@ -25,6 +25,10 @@ func (r *resource) Name() string {
 	return r.base.Name()
 }
 
+func (r *resource) Version() string {
+	return r.base.Version()
+}
+
 func (r *resource) Access() (v2.Access, error) {
 	if err := r.compute(); err != nil {
 		return nil, err

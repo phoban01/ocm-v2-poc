@@ -30,19 +30,19 @@ func (c *component) Version() string {
 	return c.version
 }
 
-func (c *component) Provider() (*v2.Provider, error) {
-	return &v2.Provider{
+func (c *component) Provider() (*types.Provider, error) {
+	return &types.Provider{
 		Name: c.provider,
 	}, nil
 }
 
-func (c *component) Descriptor() (*v2.Descriptor, error) {
-	return &v2.Descriptor{
+func (c *component) Descriptor() (*types.Descriptor, error) {
+	return &types.Descriptor{
 		ObjectMeta: types.ObjectMeta{
 			Name:    c.name,
 			Version: c.version,
 		},
-		Provider: v2.Provider{
+		Provider: types.Provider{
 			Name: c.provider,
 		},
 	}, nil

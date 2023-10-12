@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/phoban01/ocm-v2/providers/filesystem"
@@ -9,12 +8,12 @@ import (
 )
 
 func main() {
-	repo, err := oci.Repository("ghcr.io/phoban01/mytest")
+	repo, err := oci.Repository("ghcr.io/phoban01")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cmp, err := repo.Get("ocm.software/piaras", "v5.0.0")
+	cmp, err := repo.Get("ocm.software/v2/server", "v1.0.0")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,14 +25,5 @@ func main() {
 
 	if err := archive.Write(cmp); err != nil {
 		log.Fatal(err)
-	}
-
-	resources, err := cmp.Resources()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, item := range resources {
-		fmt.Println(item.Name())
 	}
 }

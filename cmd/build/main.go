@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	v2 "github.com/phoban01/ocm-v2/api/v2"
@@ -18,7 +19,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	image, err := NewImageResource("redis", "docker.io/redis:latest")
+	image, err := NewImageResource("nginx", "docker.io/nginx", "1.25.2")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,13 +32,13 @@ func main() {
 	resources := []v2.Resource{config, image, chart}
 
 	// create a new component
-	cmp := build.New("ocm.software/piaras", "v5.0.0", "acme.org")
+	cmp := build.New("ocm.software/v2/server", "v1.0.0", "acme.org")
 
 	// add the resources to the component
 	cmp = mutate.WithResources(cmp, resources...)
 
 	// setup the repository
-	repo, err := oci.Repository("ghcr.io/phoban01/mytest")
+	repo, err := oci.Repository("ghcr.io/phoban01")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,13 +66,14 @@ func NewFileResource(name, path, mediaType string) (v2.Resource, error) {
 	return build.NewResource(meta, access), nil
 }
 
-func NewImageResource(name, ref string) (v2.Resource, error) {
+func NewImageResource(name, ref, version string) (v2.Resource, error) {
 	meta := types.ObjectMeta{
-		Name: name,
-		Type: types.OCIImage,
+		Name:    name,
+		Type:    types.OCIImage,
+		Version: version,
 	}
 
-	access, err := oci.FromImage(ref)
+	access, err := oci.FromImage(fmt.Sprintf("%s:%s", ref, version))
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +83,9 @@ func NewImageResource(name, ref string) (v2.Resource, error) {
 
 func NewChartResource(name, ref, version string) (v2.Resource, error) {
 	meta := types.ObjectMeta{
-		Name: name,
-		Type: types.HelmChart,
+		Name:    name,
+		Type:    types.HelmChart,
+		Version: version,
 	}
 
 	access, err := helm.FromChart(ref, version)

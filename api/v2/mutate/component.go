@@ -15,11 +15,10 @@ type component struct {
 	addRepository []v2.Repository
 
 	version        string
-	computed       bool
 	resources      []v2.Resource
 	signatures     []v2.Signature
 	storageContext []v2.RepositoryContext
-	descriptor     *v2.Descriptor
+	descriptor     *types.Descriptor
 
 	sync.Mutex
 }
@@ -29,10 +28,6 @@ var _ v2.Component = (*component)(nil)
 func (c *component) compute() error {
 	c.Lock()
 	defer c.Unlock()
-
-	if c.computed {
-		return nil
-	}
 
 	var updatedResources bool
 	if c.addResources != nil {
@@ -52,12 +47,12 @@ func (c *component) compute() error {
 
 	c.storageContext = sctx
 
-	od, err := c.base.Descriptor()
+	desc, err := c.base.Descriptor()
 	if err != nil {
 		return err
 	}
 
-	c.descriptor = od
+	c.descriptor = desc
 
 	if updatedResources {
 		c.descriptor.Resources = make([]types.Resource, len(c.resources))
@@ -79,8 +74,10 @@ func (c *component) compute() error {
 
 			c.descriptor.Resources[i] = types.Resource{
 				ObjectMeta: types.ObjectMeta{
-					Name: item.Name(),
-					Type: item.Type(),
+					Name:    item.Name(),
+					Type:    item.Type(),
+					Labels:  item.Labels(),
+					Version: item.Version(),
 				},
 				Access: accData,
 				Digest: dig,
@@ -98,7 +95,7 @@ func (c *component) Version() string {
 	return c.base.Version()
 }
 
-func (c *component) Provider() (*v2.Provider, error) {
+func (c *component) Provider() (*types.Provider, error) {
 	return c.base.Provider()
 }
 
@@ -109,7 +106,7 @@ func (c *component) RepositoryContext() ([]v2.RepositoryContext, error) {
 	return c.storageContext, nil
 }
 
-func (c *component) Descriptor() (*v2.Descriptor, error) {
+func (c *component) Descriptor() (*types.Descriptor, error) {
 	if err := c.compute(); err != nil {
 		return nil, err
 	}

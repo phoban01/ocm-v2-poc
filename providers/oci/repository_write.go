@@ -28,8 +28,8 @@ func (r *repository) Write(component v2.Component) error {
 	url := fmt.Sprintf(
 		"%s/component-descriptors/%s:%s",
 		r.registry,
-		desc.Name,
-		desc.Version,
+		desc.ObjectMeta.Name,
+		desc.ObjectMeta.Version,
 	)
 
 	ref, err := name.ParseReference(url)

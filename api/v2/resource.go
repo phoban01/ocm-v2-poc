@@ -15,6 +15,7 @@ type Resource interface {
 type ObjectMeta interface {
 	Name() string
 	Labels() map[string]string
+	Version() string
 }
 
 type Transferable interface {

@@ -16,7 +16,7 @@ import (
 type component struct {
 	repository v2.Repository
 	version    string
-	descriptor v2.Descriptor
+	descriptor types.Descriptor
 	resources  []v2.Resource
 	signatures []v2.Signature
 }
@@ -36,14 +36,14 @@ func (c *component) compute() error {
 }
 
 func (c *component) Version() string {
-	return c.descriptor.Version
+	return c.descriptor.ObjectMeta.Version
 }
 
-func (c *component) Provider() (*v2.Provider, error) {
+func (c *component) Provider() (*types.Provider, error) {
 	return &c.descriptor.Provider, nil
 }
 
-func (c *component) Descriptor() (*v2.Descriptor, error) {
+func (c *component) Descriptor() (*types.Descriptor, error) {
 	return &c.descriptor, nil
 }
 
