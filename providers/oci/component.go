@@ -1,8 +1,9 @@
-package filesystem
+package oci
 
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	v2 "github.com/phoban01/ocm-v2/api/v2"
 
@@ -13,8 +14,8 @@ import (
 )
 
 type component struct {
-	context    v2.RepositoryContext
 	repository v2.Repository
+	version    string
 	descriptor v2.Descriptor
 	resources  []v2.Resource
 	signatures []v2.Signature
@@ -27,7 +28,7 @@ func (c *component) compute() error {
 	for i, item := range c.descriptor.Resources {
 		res, err := c.processResource(item)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to process resource: %w", err)
 		}
 		c.resources[i] = res
 	}
@@ -86,10 +87,11 @@ func (c *component) processResource(item types.Resource) (v2.Resource, error) {
 		if !ok {
 			return nil, errors.New("media type not found or invalid")
 		}
-		accessor := &accessor{
-			mediaType: mediaType,
-			digest:    *item.Digest,
-			filepath:  item.Digest.Value,
+		accessor := &localAccess{
+			repository: c.repository,
+			desc:       c.descriptor,
+			mediaType:  mediaType,
+			digest:     *item.Digest,
 		}
 		return mutate.WithAccess(build.DecodeResource(item), accessor), nil
 	default:

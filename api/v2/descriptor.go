@@ -6,7 +6,7 @@ import "github.com/phoban01/ocm-v2/api/v2/types"
 type Descriptor struct {
 	types.ObjectMeta  `json:",inline"`
 	Provider          Provider            `json:"provider"`
-	RepositoryContext []RepositoryContext `json:"repository_context,omitempty"`
+	RepositoryContext []RepositoryContext `json:",ignore"`
 	Resources         []types.Resource    `json:"resources,omitempty"`
 	Sources           []types.Signature   `json:"sources,omitempty"`
 	References        []types.Reference   `json:"references,omitempty"`

@@ -24,7 +24,7 @@ func (r *repository) Get(name, version string) (v2.Component, error) {
 	}
 
 	return &component{
-		context:    r.Context(),
+		repository: r,
 		descriptor: desc,
 	}, nil
 }

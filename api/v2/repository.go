@@ -11,7 +11,7 @@ type Repository interface {
 }
 
 type RepositoryStorage interface {
-	ReadBlob() (Access, error)
+	ReadBlob(string) (Access, error)
 	WriteBlob(Access) error
 }
 

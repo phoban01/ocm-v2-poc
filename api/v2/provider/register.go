@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -18,14 +17,10 @@ func Register(p Provider) error {
 	return nil
 }
 
-func lookup(resource types.Resource) (Provider, error) {
-	acc := make(map[string]any)
-	if err := json.Unmarshal(resource.Access, &acc); err != nil {
-		return nil, err
-	}
-	p, ok := providers[acc["type"].(string)]
+func lookup(accessType string, resource types.Resource) (Provider, error) {
+	p, ok := providers[accessType]
 	if !ok {
-		return nil, fmt.Errorf("no provider registered for id: %s", acc["type"])
+		return nil, fmt.Errorf("no provider registered for id: %s", accessType)
 	}
 	return p, nil
 }

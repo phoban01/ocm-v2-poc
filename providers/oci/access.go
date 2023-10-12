@@ -6,10 +6,31 @@ import (
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
+	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/mutate"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
+	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/provider"
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
+
+type accessor struct {
+	repository v2.Repository
+	image      v1.Image
+	ref        string
+	mediaType  string
+}
+
+var _ v2.Access = (*accessor)(nil)
+
+var (
+	AccessType = "ociArtifact"
+	MediaType  = "application/vnd.docker.image"
+)
+
+func init() {
+	provider.Register(&accessor{})
+}
 
 func (a *accessor) compute() error {
 	ref, err := name.ParseReference(a.ref)

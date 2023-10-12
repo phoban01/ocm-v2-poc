@@ -1,20 +1,21 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
-	"github.com/phoban01/ocm-v2/providers/filesystem"
-	_ "github.com/phoban01/ocm-v2/providers/oci"
+	_ "github.com/phoban01/ocm-v2/providers/helm"
+	"github.com/phoban01/ocm-v2/providers/oci"
 )
 
 func main() {
-	repo, err := filesystem.Repository("transport-archive")
+	repo, err := oci.Repository("ghcr.io/phoban01/mytest")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cmp, err := repo.Get("ocm.software/test", "v1.0.0")
+	cmp, err := repo.Get("ocm.software/piaras", "v5.0.0")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,6 +42,17 @@ func main() {
 	}
 
 	printTable(table)
+
+	desc, err := cmp.Descriptor()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	out, err := json.MarshalIndent(desc, " ", " ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(out))
 }
 
 func printTable(data [][]string) {

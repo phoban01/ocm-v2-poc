@@ -9,6 +9,7 @@ type resource struct {
 	base      v2.Resource
 	access    v2.Access
 	newAccess v2.Access
+	digest    *types.Digest
 }
 
 var _ v2.Resource = (*resource)(nil)
@@ -28,11 +29,19 @@ func (r *resource) Access() (v2.Access, error) {
 	if err := r.compute(); err != nil {
 		return nil, err
 	}
-	return r.access, nil
+	if r.access != nil {
+		return r.access, nil
+	}
+	return r.base.Access()
 }
 
 func (r *resource) Digest() (*types.Digest, error) {
-	// r.compute()
+	if err := r.compute(); err != nil {
+		return nil, err
+	}
+	if r.digest != nil {
+		return r.digest, nil
+	}
 	return r.access.Digest()
 }
 

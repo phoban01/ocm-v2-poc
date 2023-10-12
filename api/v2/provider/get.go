@@ -4,21 +4,31 @@ import (
 	"fmt"
 
 	v2 "github.com/phoban01/ocm-v2/api/v2"
-	"github.com/phoban01/ocm-v2/api/v2/builder"
+	"github.com/phoban01/ocm-v2/api/v2/build"
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
-func GetResource(ctx v2.RepositoryContext, resource types.Resource) (v2.Resource, error) {
-	prov, err := lookup(resource)
+func GetAccessForResource(
+	ctx v2.RepositoryContext,
+	resource types.Resource,
+	accessType string,
+) (v2.Access, error) {
+	prov, err := lookup(accessType, resource)
 	if err != nil {
 		return nil, fmt.Errorf("unknown provider: %w", err)
 	}
+	return prov.Decode(ctx, resource)
+}
 
-	accessor, err := prov.Decode(ctx, resource)
+func GetResource(
+	ctx v2.RepositoryContext,
+	resource types.Resource,
+	accessType string,
+) (v2.Resource, error) {
+	access, err := GetAccessForResource(ctx, resource, accessType)
 	if err != nil {
-		return nil, fmt.Errorf("unknown access type: %w", err)
+		return nil, err
 	}
-
-	return mutate.WithAccess(builder.DecodeResource(resource), accessor), nil
+	return mutate.WithAccess(build.DecodeResource(resource), access), nil
 }

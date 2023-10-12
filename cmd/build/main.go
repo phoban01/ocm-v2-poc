@@ -4,7 +4,7 @@ import (
 	"log"
 
 	v2 "github.com/phoban01/ocm-v2/api/v2"
-	"github.com/phoban01/ocm-v2/api/v2/builder"
+	"github.com/phoban01/ocm-v2/api/v2/build"
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
 	"github.com/phoban01/ocm-v2/providers/filesystem"
@@ -31,13 +31,13 @@ func main() {
 	resources := []v2.Resource{config, image, chart}
 
 	// create a new component
-	cmp := builder.New("ocm.software/test", "v1.0.0", "acme.org")
+	cmp := build.New("ocm.software/piaras", "v5.0.0", "acme.org")
 
 	// add the resources to the component
 	cmp = mutate.WithResources(cmp, resources...)
 
 	// setup the repository
-	repo, err := filesystem.Repository("transport-archive")
+	repo, err := oci.Repository("ghcr.io/phoban01/mytest")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,14 +52,17 @@ func NewFileResource(name, path, mediaType string) (v2.Resource, error) {
 	meta := types.ObjectMeta{
 		Name: name,
 		Type: types.Blob,
+		Labels: map[string]string{
+			"ocm.software/filename": path,
+		},
 	}
 
 	access, err := filesystem.FromFile(path, filesystem.WithMediaType(mediaType))
 	if err != nil {
 		return nil, err
 	}
-	// define the config resource
-	return builder.NewResource(meta, access), nil
+
+	return build.NewResource(meta, access), nil
 }
 
 func NewImageResource(name, ref string) (v2.Resource, error) {
@@ -73,7 +76,7 @@ func NewImageResource(name, ref string) (v2.Resource, error) {
 		return nil, err
 	}
 
-	return builder.NewResource(meta, access, builder.Deferrable(true)), nil
+	return build.NewResource(meta, access, build.Deferrable(true)), nil
 }
 
 func NewChartResource(name, ref, version string) (v2.Resource, error) {
@@ -87,5 +90,5 @@ func NewChartResource(name, ref, version string) (v2.Resource, error) {
 		return nil, err
 	}
 
-	return builder.NewResource(meta, access), nil
+	return build.NewResource(meta, access), nil
 }

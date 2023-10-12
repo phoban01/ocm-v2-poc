@@ -29,10 +29,10 @@ func (r *repository) Write(component v2.Component) error {
 		return err
 	}
 
-	visitedResources := make([]v2.Resource, 0)
-	for _, item := range resources {
+	visitedResources := make([]v2.Resource, len(resources))
+	for i, item := range resources {
 		if item.Deferrable() {
-			visitedResources = append(visitedResources, item)
+			visitedResources[i] = item
 			continue
 		}
 
@@ -69,9 +69,7 @@ func (r *repository) Write(component v2.Component) error {
 			return err
 		}
 
-		item = mutate.WithAccess(item, newAccess)
-
-		visitedResources = append(visitedResources, item)
+		visitedResources[i] = mutate.WithAccess(item, newAccess)
 	}
 
 	component = mutate.WithResources(component, visitedResources...)

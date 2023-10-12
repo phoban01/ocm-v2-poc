@@ -1,4 +1,4 @@
-package builder
+package build
 
 import (
 	v2 "github.com/phoban01/ocm-v2/api/v2"

@@ -29,7 +29,11 @@ func (a *accessor) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
-	a.ref = obj["imageReference"]
+	if obj["type"] == "localBlob/v1" {
+		a.ref = obj["localReference"]
+	} else {
+		a.ref = obj["imageReference"]
+	}
 	a.mediaType = obj["mediaType"]
 	return nil
 }

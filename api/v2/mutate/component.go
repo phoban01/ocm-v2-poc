@@ -41,17 +41,6 @@ func (c *component) compute() error {
 	}
 	c.addResources = nil
 
-	sigs, err := c.base.Signatures()
-	if err != nil {
-		return err
-	}
-
-	for _, add := range c.addSignatures {
-		sigs = append(sigs, add)
-	}
-
-	c.signatures = sigs
-
 	sctx, err := c.base.RepositoryContext()
 	if err != nil {
 		return err
@@ -71,8 +60,9 @@ func (c *component) compute() error {
 	c.descriptor = od
 
 	if updatedResources {
-		for _, r := range c.resources {
-			acc, err := r.Access()
+		c.descriptor.Resources = make([]types.Resource, len(c.resources))
+		for i, item := range c.resources {
+			acc, err := item.Access()
 			if err != nil {
 				return err
 			}
@@ -82,24 +72,21 @@ func (c *component) compute() error {
 				return err
 			}
 
-			dig, err := r.Digest()
+			dig, err := item.Digest()
 			if err != nil {
 				return err
 			}
 
-			re := types.Resource{
+			c.descriptor.Resources[i] = types.Resource{
 				ObjectMeta: types.ObjectMeta{
-					Name: r.Name(),
-					Type: r.Type(),
+					Name: item.Name(),
+					Type: item.Type(),
 				},
 				Access: accData,
 				Digest: dig,
 			}
-			c.descriptor.Resources = append(c.descriptor.Resources, re)
 		}
 	}
-
-	c.descriptor.RepositoryContext = c.storageContext
 
 	return nil
 }
