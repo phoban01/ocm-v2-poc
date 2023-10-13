@@ -1,5 +1,7 @@
 # OCM V2
 
+ADR: https://hackmd.io/@phoban01/ocm-lib-proposal
+
 This is an experimental re-imagining of how the core OCM library could look.
 
 ## **⚠️ this is not a feature complete implementation, it is a draft**
