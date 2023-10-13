@@ -37,7 +37,8 @@ func main() {
 	// add resources to the component using the mutate package
 	cmp = mutate.WithResources(cmp, config)
 
-	// setup the repository using the filesystem provider
+	// setup the repository using the github provider
+	// arguments are owner and repository
 	repo, err := github.Repository("phoban01", "ocm-github-repository")
 	if err != nil {
 		log.Fatal(err)
