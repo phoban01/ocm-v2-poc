@@ -16,59 +16,46 @@ package main
 import (
 	"log"
 
-	"github.com/phoban01/ocm-v2/api/v2/archive"
-	"github.com/phoban01/ocm-v2/api/v2/builder"
+	"github.com/phoban01/ocm-v2/api/v2/build"
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
-	"github.com/phoban01/ocm-v2/providers/blob"
-	"github.com/phoban01/ocm-v2/providers/oci"
+	"github.com/phoban01/ocm-v2/providers/filesystem"
 )
 
 func main() {
-	// define config metadata
-	configMeta := types.ObjectMeta{
+	// define metadata for the resource
+	meta := types.ObjectMeta{
 		Name: "config",
-		Type: types.Blob,
+		Type: types.ResourceType("file"),
 	}
 
-	// get the config blob accessor
-	configAccess, err := blob.FromFile("config.yaml")
+	// create an access method for a file on disk
+	// notice the filesystem provider helper methods to access resources
+	// filesystem.ReadFile returns v2.Access
+	access, err := filesystem.ReadFile(
+		"config.yaml",
+		filesystem.WithMediaType("application/x-yaml"),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// define the config resource
-	config := builder.NewResource(configMeta, configAccess)
+	// build the config resource using the metadata and access method
+	config := build.NewResource(meta, access)
 
-	// define the image metadata
-	imageMeta := types.ObjectMeta{
-		Name: "image",
-		Type: types.OCIImage,
-	}
+	// create the component
+	cmp := build.New("ocm.software/test", "v1.0.0", "acme.org")
 
-	// get the oci image
-	imageAcc, err := oci.FromImage("docker.io/redis:latest")
+	// add resources to the component using the mutate package
+	cmp = mutate.WithResources(cmp, config)
+
+	// setup the repository using the filesystem provider
+	repo, err := filesystem.Repository("./transport-archive")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// define the image resource
-	// builder.Deferrable means the resource does not need to be read at build time
-	image := builder.NewResource(imageMeta, imageAcc, builder.Deferrable(true))
-
-	// create a new component
-	cmp := builder.New("ocm.software/test", "v1.0.0", "acme.org")
-
-	// add the resources to the component
-	cmp = mutate.WithResources(cmp, config, image)
-
-	// setup the repository
-	repo, err := archive.Repository("transport-archive")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// write the component to the archive
+	// write the component to the repository
 	if err := repo.Write(cmp); err != nil {
 		log.Fatal(err)
 	}
