@@ -5,4 +5,5 @@ use (
 	./api
 	./providers/helm
 	./providers/oci
+	./providers/github
 )

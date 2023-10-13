@@ -11,7 +11,7 @@ import (
 )
 
 func (r *repository) WriteBlob(acc v2.Access) (v2.Access, error) {
-	if err := os.Mkdir(r.blobdir, os.ModePerm); err != nil {
+	if err := os.MkdirAll(r.blobdir, os.ModePerm); err != nil {
 		return nil, err
 	}
 
