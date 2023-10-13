@@ -19,6 +19,10 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
+func (r *repository) WriteBlob(v2.Access) (v2.Access, error) {
+	return nil, nil
+}
+
 func (r *repository) Write(component v2.Component) error {
 	desc, err := component.Descriptor()
 	if err != nil {
@@ -141,12 +145,4 @@ func (r *rawManifest) RawManifest() ([]byte, error) {
 
 func (r *rawManifest) MediaType() (types.MediaType, error) {
 	return r.mediaType, nil
-}
-
-func (r *repository) ReadBlob(digest string) (v2.Access, error) {
-	return nil, nil
-}
-
-func (r *repository) WriteBlob(v2.Access) error {
-	return nil
 }

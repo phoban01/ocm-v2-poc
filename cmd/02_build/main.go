@@ -58,7 +58,7 @@ func NewFileResource(name, path, mediaType string) (v2.Resource, error) {
 		},
 	}
 
-	access, err := filesystem.FromFile(path, filesystem.WithMediaType(mediaType))
+	access, err := filesystem.ReadFile(path, filesystem.WithMediaType(mediaType))
 	if err != nil {
 		return nil, err
 	}

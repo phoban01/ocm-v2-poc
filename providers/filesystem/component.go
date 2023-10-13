@@ -87,9 +87,10 @@ func (c *component) processResource(item types.Resource) (v2.Resource, error) {
 			return nil, errors.New("media type not found or invalid")
 		}
 		accessor := &accessor{
-			mediaType: mediaType,
-			digest:    *item.Digest,
-			filepath:  item.Digest.Value,
+			repository: c.repository,
+			mediaType:  mediaType,
+			digest:     *item.Digest,
+			filepath:   item.Digest.Value,
 		}
 		return mutate.WithAccess(build.DecodeResource(item), accessor), nil
 	default:

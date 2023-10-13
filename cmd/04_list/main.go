@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
@@ -42,17 +41,6 @@ func main() {
 	}
 
 	printTable(table)
-
-	desc, err := cmp.Descriptor()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	out, err := json.MarshalIndent(desc, " ", " ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(out))
 }
 
 func printTable(data [][]string) {

@@ -8,7 +8,7 @@ import (
 type Descriptor struct {
 	ObjectMeta        `json:",inline"`
 	Provider          Provider            `json:"provider"`
-	RepositoryContext []RepositoryContext `json:",ignore"`
+	RepositoryContext []RepositoryContext `json:",omitempty"`
 	Resources         []Resource          `json:"resources,omitempty"`
 	Sources           []Signature         `json:"sources,omitempty"`
 	References        []Reference         `json:"references,omitempty"`

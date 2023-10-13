@@ -8,7 +8,8 @@ import (
 )
 
 type repository struct {
-	path string
+	path    string
+	blobdir string
 }
 
 var _ v2.Repository = (*repository)(nil)
@@ -18,7 +19,8 @@ func Repository(path string) (v2.Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &repository{path: p}, nil
+	blobdir := filepath.Join(p, "blobs")
+	return &repository{path: p, blobdir: blobdir}, nil
 }
 
 func (r *repository) Context() v2.RepositoryContext {

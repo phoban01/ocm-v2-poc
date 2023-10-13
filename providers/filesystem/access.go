@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -21,42 +20,19 @@ var (
 )
 
 type accessor struct {
-	data      []byte
-	basepath  string
-	filepath  string
-	mediaType string
-	labels    map[string]string
-	digest    types.Digest
+	data       []byte
+	basepath   string
+	filepath   string
+	mediaType  string
+	labels     map[string]string
+	digest     types.Digest
+	repository v2.Repository
 }
 
 var _ v2.Access = (*accessor)(nil)
 
 func init() {
 	provider.Register(&accessor{})
-}
-
-type AccessOption func(*accessor)
-
-func WithMediaType(mediaType string) func(*accessor) {
-	return func(a *accessor) {
-		a.mediaType = mediaType
-	}
-}
-
-func FromFile(path string, opts ...AccessOption) (v2.Access, error) {
-	a := &accessor{filepath: path}
-	for _, f := range opts {
-		f(a)
-	}
-	return a, nil
-}
-
-func FromBytes(data []byte, opts ...AccessOption) (v2.Access, error) {
-	a := &accessor{data: data}
-	for _, f := range opts {
-		f(a)
-	}
-	return a, nil
 }
 
 func (a *accessor) Type() string {
@@ -78,8 +54,7 @@ func (a *accessor) Data() (io.ReadCloser, error) {
 	if a.data != nil {
 		return io.NopCloser(bytes.NewReader(a.data)), nil
 	}
-	p := filepath.Join(a.basepath, strings.TrimPrefix(a.filepath, "sha256:"))
-	return os.Open(p)
+	return a.repository.ReadBlob(a.filepath)
 }
 
 func (a *accessor) Digest() (*types.Digest, error) {

@@ -26,7 +26,7 @@ func main() {
 		Type: types.Blob,
 	})
 
-	buffer := make([]byte, 4096) // Adjust size as needed
+	buffer := make([]byte, 4096)
 	for {
 		n, err := config.Read(buffer)
 		if err != nil && err != io.EOF {

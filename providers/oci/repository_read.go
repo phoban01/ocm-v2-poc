@@ -12,6 +12,10 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
+func (r *repository) ReadBlob(digest string) (io.ReadCloser, error) {
+	return nil, nil
+}
+
 func (r *repository) Get(componentName, version string) (v2.Component, error) {
 	url := fmt.Sprintf(
 		"%s/component-descriptors/%s:%s",

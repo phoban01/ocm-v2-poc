@@ -10,17 +10,43 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 )
 
+func (r *repository) WriteBlob(acc v2.Access) (v2.Access, error) {
+	if err := os.Mkdir(r.blobdir, os.ModePerm); err != nil {
+		return nil, err
+	}
+
+	dig, err := acc.Digest()
+	if err != nil {
+		return nil, err
+	}
+
+	path := filepath.Join(r.blobdir, dig.Value)
+
+	f, err := os.Create(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	reader, err := acc.Data()
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+
+	if _, err := io.Copy(f, reader); err != nil {
+		return nil, err
+	}
+
+	return ReadFile(path, WithMediaType(acc.MediaType()))
+}
+
 func (r *repository) Write(component v2.Component) error {
 	if err := os.RemoveAll(r.path); err != nil {
 		return err
 	}
 
 	if err := os.Mkdir(r.path, os.ModePerm); err != nil {
-		return err
-	}
-
-	blobdir := filepath.Join(r.path, "blobs")
-	if err := os.Mkdir(blobdir, os.ModePerm); err != nil {
 		return err
 	}
 
@@ -36,40 +62,17 @@ func (r *repository) Write(component v2.Component) error {
 			continue
 		}
 
-		dig, err := item.Digest()
-		if err != nil {
-			return err
-		}
-
-		p := filepath.Join(blobdir, dig.Value)
-
-		f, err := os.Create(p)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
 		acc, err := item.Access()
 		if err != nil {
 			return err
 		}
 
-		reader, err := acc.Data()
-		if err != nil {
-			return err
-		}
-		defer reader.Close()
-
-		if _, err := io.Copy(f, reader); err != nil {
-			return err
-		}
-
-		newAccess, err := FromFile(p, WithMediaType(acc.MediaType()))
+		acc, err = r.WriteBlob(acc)
 		if err != nil {
 			return err
 		}
 
-		visitedResources[i] = mutate.WithAccess(item, newAccess)
+		visitedResources[i] = mutate.WithAccess(item, acc)
 	}
 
 	component = mutate.WithResources(component, visitedResources...)

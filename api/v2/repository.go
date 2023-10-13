@@ -1,5 +1,7 @@
 package v2
 
+import "io"
+
 type Repository interface {
 	RepositoryStorage
 
@@ -11,8 +13,8 @@ type Repository interface {
 }
 
 type RepositoryStorage interface {
-	ReadBlob(string) (Access, error)
-	WriteBlob(Access) error
+	ReadBlob(string) (io.ReadCloser, error)
+	WriteBlob(Access) (Access, error)
 }
 
 type RepositoryContext interface {
