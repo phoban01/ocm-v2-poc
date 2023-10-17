@@ -38,7 +38,7 @@ func (r *repository) WriteBlob(acc v2.Access) (v2.Access, error) {
 		return nil, err
 	}
 
-	return ReadFile(path, WithMediaType(acc.MediaType()))
+	return FromFile(path, WithMediaType(acc.MediaType()))
 }
 
 func (r *repository) Write(component v2.Component) error {

@@ -20,7 +20,7 @@ func main() {
 	// create an access method for a file on disk
 	// notice the filesystem provider helper methods to access resources
 	// filesystem.ReadFile returns v2.Access
-	access, err := filesystem.ReadFile(
+	access, err := filesystem.FromFile(
 		"config.yaml",
 		filesystem.WithMediaType("application/x-yaml"),
 	)

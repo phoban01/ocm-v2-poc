@@ -5,5 +5,5 @@ type ResourceType string
 const (
 	Blob      ResourceType = "blob"
 	OCIImage  ResourceType = "ociImage"
-	HelmChart ResourceType = "helm"
+	HelmChart ResourceType = "helmChart"
 )

@@ -10,7 +10,7 @@ func WithMediaType(mediaType string) func(*accessor) {
 	}
 }
 
-func ReadFile(path string, opts ...AccessOption) (v2.Access, error) {
+func FromFile(path string, opts ...AccessOption) (v2.Access, error) {
 	a := &accessor{
 		filepath:   path,
 		repository: &repository{},

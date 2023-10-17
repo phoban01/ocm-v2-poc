@@ -13,7 +13,10 @@ import (
 )
 
 func (a *accessor) Type() string {
-	return AccessType
+	if a.accessType != "" {
+		return a.accessType
+	}
+	return LocalAccessType
 }
 
 func (a *accessor) MediaType() string {
@@ -28,6 +31,9 @@ func (a *accessor) Labels() map[string]string {
 }
 
 func (a *accessor) Data() (io.ReadCloser, error) {
+	if a.path != "" {
+		return os.Open(a.path)
+	}
 	dl := &downloader.ChartDownloader{
 		Out:              os.Stderr,
 		Getters:          getter.All(&cli.EnvSettings{}),
@@ -44,6 +50,7 @@ func (a *accessor) Data() (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return os.Open(dst)
 }
 

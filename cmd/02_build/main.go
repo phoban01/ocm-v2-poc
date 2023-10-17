@@ -58,7 +58,7 @@ func NewFileResource(name, path, mediaType string) (v2.Resource, error) {
 		},
 	}
 
-	access, err := filesystem.ReadFile(path, filesystem.WithMediaType(mediaType))
+	access, err := filesystem.FromFile(path, filesystem.WithMediaType(mediaType))
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func NewChartResource(name, ref, version string) (v2.Resource, error) {
 		Version: version,
 	}
 
-	access, err := helm.FromChart(ref, version)
+	access, err := helm.FromRepository(ref, version)
 	if err != nil {
 		return nil, err
 	}
