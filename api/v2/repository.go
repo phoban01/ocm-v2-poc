@@ -1,6 +1,9 @@
 package v2
 
-import "io"
+import (
+	"context"
+	"io"
+)
 
 type Repository interface {
 	RepositoryStorage
@@ -8,7 +11,7 @@ type Repository interface {
 	Context() RepositoryContext
 	List() ([]Component, error)
 	Get(name string, version string) (Component, error)
-	Write(Component) error
+	Write(context.Context, Component) error
 	Delete() error
 }
 

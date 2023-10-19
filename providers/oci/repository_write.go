@@ -23,7 +23,7 @@ func (r *repository) WriteBlob(v2.Access) (v2.Access, error) {
 	return nil, nil
 }
 
-func (r *repository) Write(component v2.Component) error {
+func (r *repository) Write(ctx context.Context, component v2.Component) error {
 	desc, err := component.Descriptor()
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func (r *repository) Write(component v2.Component) error {
 			return err
 		}
 
-		if err := pusher.Upload(context.Background(), ref.Context(), layer); err != nil {
+		if err := pusher.Upload(ctx, ref.Context(), layer); err != nil {
 			return err
 		}
 

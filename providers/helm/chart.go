@@ -27,20 +27,6 @@ func init() {
 	provider.Register(&accessor{})
 }
 
-type AccessOption func(*accessor)
-
-func WithMediaType(mediaType string) func(*accessor) {
-	return func(a *accessor) {
-		a.mediaType = mediaType
-	}
-}
-
-func WithAccessType(accessType string) func(*accessor) {
-	return func(a *accessor) {
-		a.accessType = accessType
-	}
-}
-
 func FromRepository(chart, version string, opts ...AccessOption) (v2.Access, error) {
 	a := &accessor{
 		chart:   chart,

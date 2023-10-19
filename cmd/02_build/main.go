@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -44,7 +45,7 @@ func main() {
 	}
 
 	// write the component to the archive
-	if err := repo.Write(cmp); err != nil {
+	if err := repo.Write(context.TODO(), cmp); err != nil {
 		log.Fatal(err)
 	}
 }

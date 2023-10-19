@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"os"
@@ -41,7 +42,7 @@ func (r *repository) WriteBlob(acc v2.Access) (v2.Access, error) {
 	return FromFile(path, WithMediaType(acc.MediaType()))
 }
 
-func (r *repository) Write(component v2.Component) error {
+func (r *repository) Write(_ context.Context, component v2.Component) error {
 	if err := os.RemoveAll(r.path); err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/phoban01/ocm-v2/providers/filesystem"
@@ -23,7 +24,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := archive.Write(cmp); err != nil {
+	if err := archive.Write(context.TODO(), cmp); err != nil {
 		log.Fatal(err)
 	}
 }

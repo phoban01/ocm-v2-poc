@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
+	"os"
 
+	"github.com/phoban01/ocm-v2/api/v2/authn"
 	"github.com/phoban01/ocm-v2/api/v2/build"
+	"github.com/phoban01/ocm-v2/api/v2/configr"
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
 	"github.com/phoban01/ocm-v2/providers/filesystem"
@@ -13,7 +17,7 @@ import (
 func main() {
 	// define metadata for the resource
 	meta := types.ObjectMeta{
-		Name: "config",
+		Name: "kubernetes-config",
 		Type: types.ResourceType("file"),
 	}
 
@@ -29,23 +33,36 @@ func main() {
 	}
 
 	// build the config resource using the metadata and access method
-	config := build.NewResource(meta, access)
+	resource := build.NewResource(meta, access)
 
 	// create the component
-	cmp := build.New("ocm.software/test", "v1.0.0", "acme.org")
+	cmp := build.New("ocm.software/test", "v1.2.0", "acme.org")
 
 	// add resources to the component using the mutate package
-	cmp = mutate.WithResources(cmp, config)
+	cmp = mutate.WithResources(cmp, resource)
+
+	auth := &authn.Bearer{
+		Token: os.Getenv("GITHUB_TOKEN"),
+	}
+
+	config := &configr.StaticConfig{
+		"commit.message": "[ocm] automatically added via ocm",
+	}
+
+	opts := []github.Option{
+		github.WithAuth(auth),
+		github.WithConfig(config),
+	}
 
 	// setup the repository using the github provider
 	// arguments are owner and repository
-	repo, err := github.Repository("phoban01", "ocm-github-repository")
+	repo, err := github.Repository("phoban01", "ocm-github-repository", opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// write the component to the repository
-	if err := repo.Write(cmp); err != nil {
+	if err := repo.Write(context.TODO(), cmp); err != nil {
 		log.Fatal(err)
 	}
 }

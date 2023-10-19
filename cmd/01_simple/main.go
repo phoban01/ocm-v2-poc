@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/phoban01/ocm-v2/api/v2/build"
@@ -43,7 +44,7 @@ func main() {
 	}
 
 	// write the component to the repository
-	if err := repo.Write(cmp); err != nil {
+	if err := repo.Write(context.TODO(), cmp); err != nil {
 		log.Fatal(err)
 	}
 }
