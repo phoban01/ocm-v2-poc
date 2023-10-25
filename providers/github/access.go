@@ -46,6 +46,14 @@ func (a *accessor) MediaType() string {
 	return MediaType
 }
 
+func (a *accessor) Reference() string {
+	return a.filepath
+}
+
+func (a *accessor) Length() (int64, error) {
+	return 0, nil
+}
+
 func (a *accessor) Labels() map[string]string {
 	return a.labels
 }

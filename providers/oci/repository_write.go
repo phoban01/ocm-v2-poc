@@ -1,26 +1,66 @@
 package oci
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
-	"github.com/google/go-containerregistry/pkg/authn"
-	"github.com/google/go-containerregistry/pkg/name"
-	v1 "github.com/google/go-containerregistry/pkg/v1"
-	"github.com/google/go-containerregistry/pkg/v1/empty"
-	gmutate "github.com/google/go-containerregistry/pkg/v1/mutate"
-	"github.com/google/go-containerregistry/pkg/v1/remote"
-	"github.com/google/go-containerregistry/pkg/v1/static"
-	"github.com/google/go-containerregistry/pkg/v1/tarball"
-	gtypes "github.com/google/go-containerregistry/pkg/v1/types"
+	digest "github.com/opencontainers/go-digest"
+	"github.com/opencontainers/image-spec/specs-go"
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	v2 "github.com/phoban01/ocm-v2/api/v2"
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
+	"oras.land/oras-go/v2"
+	"oras.land/oras-go/v2/content"
+	"oras.land/oras-go/v2/registry/remote"
 )
 
-func (r *repository) WriteBlob(v2.Access) (v2.Access, error) {
-	return nil, nil
+// digest needs to come from access and should be a ocispecDigest
+// we should probably store the length on the access also.
+func (r *repository) WriteBlob(ctx context.Context, acc v2.Access) (v2.Access, error) {
+	dig, err := acc.Digest()
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := acc.Data()
+	if err != nil {
+		return nil, err
+	}
+	defer data.Close()
+
+	size, err := acc.Length()
+	if err != nil {
+		return nil, err
+	}
+
+	desc := ocispec.Descriptor{
+		MediaType: "application/tar-gzip",
+		Digest:    digest.NewDigestFromEncoded(digest.SHA256, dig.Value),
+		Size:      size,
+	}
+
+	store, err := r.storage()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := store.Push(ctx, desc, data); err != nil {
+		return nil, err
+	}
+
+	return &localBlob{
+		mediaType: "application/tar-gzip",
+		length:    size,
+		digest: types.Digest{
+			HashAlgorithm:          "sha256",
+			NormalisationAlgorithm: "json/v1",
+			Value:                  dig.Value,
+		},
+	}, nil
 }
 
 func (r *repository) Write(ctx context.Context, component v2.Component) error {
@@ -29,33 +69,25 @@ func (r *repository) Write(ctx context.Context, component v2.Component) error {
 		return err
 	}
 
-	url := fmt.Sprintf(
-		"%s/component-descriptors/%s:%s",
-		r.registry,
-		desc.ObjectMeta.Name,
-		desc.ObjectMeta.Version,
-	)
-
-	ref, err := name.ParseReference(url)
-	if err != nil {
-		return err
-	}
+	r.component = desc.Name
 
 	resources, err := component.Resources()
 	if err != nil {
 		return err
 	}
 
-	pusher, err := remote.NewPusher(remote.WithAuthFromKeychain(authn.DefaultKeychain))
-	if err != nil {
-		return err
-	}
-
 	processedItems := make([]v2.Resource, len(resources))
-	layersToAdd := make([]v1.Layer, 0)
+
+	layers := make([]ocispec.Descriptor, 0)
 
 	for i, item := range resources {
 		if item.Deferrable() {
+			// need to handle deferrables here
+			item, err := r.handleDeferrable(ctx, item)
+			if err != nil {
+				return err
+			}
+
 			processedItems[i] = item
 			continue
 		}
@@ -65,34 +97,33 @@ func (r *repository) Write(ctx context.Context, component v2.Component) error {
 			return err
 		}
 
-		layer, err := tarball.LayerFromOpener(
-			acc.Data,
-			tarball.WithMediaType("application/tar-gzip"),
-			tarball.WithCompressedCaching,
-		)
+		size, err := acc.Length()
 		if err != nil {
 			return err
 		}
 
-		if err := pusher.Upload(ctx, ref.Context(), layer); err != nil {
-			return err
-		}
-
-		layersToAdd = append(layersToAdd, layer)
-
-		dig, err := layer.Digest()
+		dig, err := acc.Digest()
 		if err != nil {
 			return err
 		}
 
-		item = mutate.WithAccess(item, &localAccess{
-			mediaType: "application/tar-gzip",
-			digest: types.Digest{
-				HashAlgorithm:          "sha256",
-				NormalisationAlgorithm: "json/v1",
-				Value:                  dig.String(),
+		acc, err = r.WriteBlob(ctx, acc)
+		if err != nil {
+			return err
+		}
+
+		layers = append(layers, ocispec.Descriptor{
+			MediaType: acc.MediaType(),
+			Digest:    digest.NewDigestFromEncoded(digest.SHA256, dig.Value),
+			Size:      size,
+			Annotations: map[string]string{
+				"ocm.software/resource-name": item.Name(),
+				"ocm.software/resource-type": string(item.Type()),
+				"ocm.software/access-type":   acc.Type(),
 			},
 		})
+
+		item = mutate.WithAccess(item, acc)
 
 		processedItems[i] = item
 	}
@@ -104,45 +135,82 @@ func (r *repository) Write(ctx context.Context, component v2.Component) error {
 		return err
 	}
 
-	data, err := json.Marshal(desc)
+	configBlob, err := json.Marshal(desc)
 	if err != nil {
 		return err
 	}
 
-	l := static.NewLayer(data, "ocm.software/vnd.ocm.software.component-descriptor")
+	configDesc := content.NewDescriptorFromBytes(
+		"application/vnd.ocm.software.component.config.v1+json",
+		configBlob,
+	)
+
+	manifestBlob, err := generateManifest(configDesc, layers...)
 	if err != nil {
 		return err
 	}
 
-	img := gmutate.MediaType(empty.Image, gtypes.OCIManifestSchema1)
-	img, err = gmutate.Append(img, gmutate.Addendum{Layer: l})
+	manifestDesc := content.NewDescriptorFromBytes(ocispec.MediaTypeImageManifest, manifestBlob)
+
+	store, err := r.storage()
 	if err != nil {
 		return err
 	}
 
-	for _, l := range layersToAdd {
-		img, err = gmutate.Append(img, gmutate.Addendum{Layer: l})
-		if err != nil {
-			return err
-		}
+	if err := store.Push(ctx, configDesc, bytes.NewReader(configBlob)); err != nil {
+		return err
 	}
 
-	if err := remote.Write(ref, img, remote.WithAuthFromKeychain(authn.DefaultKeychain)); err != nil {
+	if err := store.PushReference(ctx, manifestDesc, bytes.NewReader(manifestBlob), desc.Version); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-type rawManifest struct {
-	body      []byte
-	mediaType types.MediaType
+func generateManifest(config ocispec.Descriptor, layers ...ocispec.Descriptor) ([]byte, error) {
+	content := ocispec.Manifest{
+		Config:    config,
+		Layers:    layers,
+		Versioned: specs.Versioned{SchemaVersion: 2},
+	}
+	return json.Marshal(content)
 }
 
-func (r *rawManifest) RawManifest() ([]byte, error) {
-	return r.body, nil
-}
+func (r *repository) handleDeferrable(ctx context.Context, item v2.Resource) (v2.Resource, error) {
+	switch item.Type() {
+	case "ociImage":
+		version := item.Version()
+		acc, err := item.Access()
+		if err != nil {
+			return nil, err
+		}
 
-func (r *rawManifest) MediaType() (types.MediaType, error) {
-	return r.mediaType, nil
+		srcRepo := strings.TrimSuffix(acc.Reference(), ":"+version)
+		targetRef := fmt.Sprintf("%s/%s/%s", r.registry, r.component, srcRepo)
+		store, err := remote.NewRepository(targetRef)
+		if err != nil {
+			return nil, err
+		}
+		store.Client = r.client
+
+		src, err := remote.NewRepository(srcRepo)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = oras.Copy(ctx, src, version, store, version, oras.DefaultCopyOptions)
+		if err != nil {
+			return nil, err
+		}
+
+		acc = &accessor{
+			repository: r,
+			mediaType:  acc.MediaType(),
+			ref:        fmt.Sprintf("%s:%s", targetRef, version),
+		}
+
+		return mutate.WithAccess(item, acc), nil
+	}
+	return item, nil
 }

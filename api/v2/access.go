@@ -13,9 +13,13 @@ type Access interface {
 
 	MediaType() string
 
+	Reference() string
+
 	Digest() (*types.Digest, error)
 
 	Data() (io.ReadCloser, error)
+
+	Length() (int64, error)
 
 	MarshalJSON() ([]byte, error)
 

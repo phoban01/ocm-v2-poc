@@ -16,8 +16,8 @@ type Repository interface {
 }
 
 type RepositoryStorage interface {
-	ReadBlob(string) (io.ReadCloser, error)
-	WriteBlob(Access) (Access, error)
+	ReadBlob(context.Context, string) (io.ReadCloser, error)
+	WriteBlob(context.Context, Access) (Access, error)
 }
 
 type RepositoryContext interface {

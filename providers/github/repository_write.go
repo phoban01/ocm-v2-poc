@@ -13,7 +13,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func (r *repository) WriteBlob(acc v2.Access) (v2.Access, error) {
+func (r *repository) WriteBlob(_ context.Context, acc v2.Access) (v2.Access, error) {
 	return nil, nil
 }
 

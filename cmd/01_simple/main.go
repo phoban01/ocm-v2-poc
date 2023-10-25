@@ -7,7 +7,7 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/build"
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
-	"github.com/phoban01/ocm-v2/providers/filesystem"
+	fs "github.com/phoban01/ocm-v2/providers/filesystem"
 )
 
 func main() {
@@ -20,25 +20,26 @@ func main() {
 	// create an access method for a file on disk
 	// notice the filesystem provider helper methods to access resources
 	// filesystem.ReadFile returns v2.Access
-	access, err := filesystem.FromFile(
-		"config.yaml",
-		filesystem.WithMediaType("application/x-yaml"),
-	)
+	content, err := fs.FromFile("config.yaml", fs.WithMediaType("application/x-yaml"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// build the config resource using the metadata and access method
-	config := build.NewResource(meta, access)
+	config := build.NewResource(meta, content)
 
 	// create the component
-	cmp := build.New("ocm.software/test", "v1.0.0", "acme.org")
+	cfg := build.Component{
+		Name:     "ocm.software/test",
+		Version:  "v1.0.0",
+		Provider: "acme.org",
+	}
 
 	// add resources to the component using the mutate package
-	cmp = mutate.WithResources(cmp, config)
+	cmp := mutate.WithResources(cfg.New(), config)
 
 	// setup the repository using the filesystem provider
-	repo, err := filesystem.Repository("./transport-archive")
+	repo, err := fs.Repository("./transport-archive")
 	if err != nil {
 		log.Fatal(err)
 	}

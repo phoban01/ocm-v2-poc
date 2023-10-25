@@ -29,6 +29,14 @@ func (a *access) MediaType() string {
 	return a.base.MediaType()
 }
 
+func (a *access) Reference() string {
+	return a.base.Reference()
+}
+
+func (a *access) Length() (int64, error) {
+	return a.base.Length()
+}
+
 func (a *access) Labels() map[string]string {
 	return a.base.Labels()
 }

@@ -5,6 +5,12 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
+type Component struct {
+	Name     string
+	Version  string
+	Provider string
+}
+
 type component struct {
 	name      string
 	version   string
@@ -14,11 +20,11 @@ type component struct {
 
 var _ v2.Component = (*component)(nil)
 
-func New(name, version, provider string) v2.Component {
+func (c Component) New() v2.Component {
 	return &component{
-		name:     name,
-		version:  version,
-		provider: provider,
+		name:     c.Name,
+		version:  c.Version,
+		provider: c.Provider,
 	}
 }
 

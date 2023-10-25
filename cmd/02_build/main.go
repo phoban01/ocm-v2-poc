@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	v2 "github.com/phoban01/ocm-v2/api/v2"
+	"github.com/phoban01/ocm-v2/api/v2/authn"
 	"github.com/phoban01/ocm-v2/api/v2/build"
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 	"github.com/phoban01/ocm-v2/api/v2/types"
@@ -20,7 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	image, err := NewImageResource("nginx", "docker.io/nginx", "1.25.2")
+	image, err := NewImageResource("nginx", "docker.io/library/nginx", "1.25.3")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,13 +35,22 @@ func main() {
 	resources := []v2.Resource{config, image, chart}
 
 	// create a new component
-	cmp := build.New("ocm.software/v2/server", "v1.0.0", "acme.org")
+	cfg := build.Component{
+		Name:     "ocm.software/just-in-time",
+		Version:  "v2.0.0",
+		Provider: "acme.org",
+	}
 
 	// add the resources to the component
-	cmp = mutate.WithResources(cmp, resources...)
+	cmp := mutate.WithResources(cfg.New(), resources...)
+
+	creds := &authn.Basic{
+		Username: "phoban01",
+		Password: os.Getenv("GITHUB_TOKEN"),
+	}
 
 	// setup the repository
-	repo, err := oci.Repository("ghcr.io/phoban01")
+	repo, err := oci.Repository("ghcr.io/phoban01", oci.WithCredentials(creds))
 	if err != nil {
 		log.Fatal(err)
 	}

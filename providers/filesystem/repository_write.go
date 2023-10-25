@@ -11,7 +11,7 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/mutate"
 )
 
-func (r *repository) WriteBlob(acc v2.Access) (v2.Access, error) {
+func (r *repository) WriteBlob(_ context.Context, acc v2.Access) (v2.Access, error) {
 	if err := os.MkdirAll(r.blobdir, os.ModePerm); err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (r *repository) WriteBlob(acc v2.Access) (v2.Access, error) {
 	return FromFile(path, WithMediaType(acc.MediaType()))
 }
 
-func (r *repository) Write(_ context.Context, component v2.Component) error {
+func (r *repository) Write(ctx context.Context, component v2.Component) error {
 	if err := os.RemoveAll(r.path); err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (r *repository) Write(_ context.Context, component v2.Component) error {
 			return err
 		}
 
-		acc, err = r.WriteBlob(acc)
+		acc, err = r.WriteBlob(ctx, acc)
 		if err != nil {
 			return err
 		}

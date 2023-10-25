@@ -2,10 +2,12 @@ package filesystem
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -22,6 +24,7 @@ var (
 type accessor struct {
 	data       []byte
 	basepath   string
+	length     int64
 	filepath   string
 	mediaType  string
 	labels     map[string]string
@@ -46,6 +49,21 @@ func (a *accessor) MediaType() string {
 	return MediaType
 }
 
+func (a *accessor) Reference() string {
+	return a.filepath
+}
+
+func (a *accessor) Length() (int64, error) {
+	if a.data != nil {
+		return int64(len(a.data)), nil
+	}
+	info, err := os.Lstat(a.filepath)
+	if err != nil {
+		return 0, err
+	}
+	return info.Size(), nil
+}
+
 func (a *accessor) Labels() map[string]string {
 	return a.labels
 }
@@ -54,7 +72,7 @@ func (a *accessor) Data() (io.ReadCloser, error) {
 	if a.data != nil {
 		return io.NopCloser(bytes.NewReader(a.data)), nil
 	}
-	return a.repository.ReadBlob(a.filepath)
+	return a.repository.ReadBlob(context.TODO(), a.filepath)
 }
 
 func (a *accessor) Digest() (*types.Digest, error) {

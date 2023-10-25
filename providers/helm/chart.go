@@ -5,17 +5,6 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/provider"
 )
 
-type accessor struct {
-	path       string
-	chart      string
-	version    string
-	accessType string
-	mediaType  string
-	labels     map[string]string
-}
-
-var _ v2.Access = (*accessor)(nil)
-
 var (
 	LocalAccessType = "localBlob/v1"
 	MediaType       = "application/tar+gzip"

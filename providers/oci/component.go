@@ -14,7 +14,7 @@ import (
 )
 
 type component struct {
-	repository v2.Repository
+	repository *repository
 	version    string
 	descriptor types.Descriptor
 	resources  []v2.Resource
@@ -87,7 +87,7 @@ func (c *component) processResource(item types.Resource) (v2.Resource, error) {
 		if !ok {
 			return nil, errors.New("media type not found or invalid")
 		}
-		accessor := &localAccess{
+		accessor := &localBlob{
 			repository: c.repository,
 			desc:       c.descriptor,
 			mediaType:  mediaType,

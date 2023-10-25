@@ -1,66 +1,62 @@
 package oci
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 
-	"github.com/google/go-containerregistry/pkg/authn"
-	"github.com/google/go-containerregistry/pkg/name"
-	"github.com/google/go-containerregistry/pkg/v1/remote"
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	v2 "github.com/phoban01/ocm-v2/api/v2"
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
-func (r *repository) ReadBlob(digest string) (io.ReadCloser, error) {
-	return nil, nil
+func (r *repository) ReadBlob(ctx context.Context, digest string) (io.ReadCloser, error) {
+	store, err := r.storage()
+	if err != nil {
+		return nil, err
+	}
+	_, data, err := store.FetchReference(ctx, digest)
+	return data, err
 }
 
-func (r *repository) Get(componentName, version string) (v2.Component, error) {
-	url := fmt.Sprintf(
-		"%s/component-descriptors/%s:%s",
-		r.registry,
-		componentName,
-		version,
-	)
+func (r *repository) Get(name, version string) (v2.Component, error) {
+	ctx := context.TODO()
+	r.component = name
 
-	ref, err := name.ParseReference(url)
+	store, err := r.storage()
 	if err != nil {
 		return nil, err
 	}
 
-	img, err := remote.Image(ref, remote.WithAuthFromKeychain(authn.DefaultKeychain))
+	_, content, err := store.FetchReference(ctx, version)
+	if err != nil {
+		return nil, err
+	}
+	defer content.Close()
+
+	data, err := io.ReadAll(content)
 	if err != nil {
 		return nil, err
 	}
 
-	manifest, err := img.Manifest()
-	if err != nil {
+	var manifest ocispec.Manifest
+	if err := json.Unmarshal(data, &manifest); err != nil {
 		return nil, err
 	}
 
-	cd, err := name.NewDigest(fmt.Sprintf("%s@%s", url, manifest.Layers[0].Digest.String()))
+	config, err := store.Fetch(ctx, manifest.Config)
 	if err != nil {
 		return nil, err
 	}
+	defer config.Close()
 
-	layer, err := remote.Layer(cd, remote.WithAuthFromKeychain(authn.DefaultKeychain))
-	if err != nil {
-		return nil, err
-	}
-
-	reader, err := layer.Uncompressed()
-	if err != nil {
-		return nil, err
-	}
-
-	layerData, err := io.ReadAll(reader)
+	configData, err := io.ReadAll(config)
 	if err != nil {
 		return nil, err
 	}
 
 	desc := types.Descriptor{}
-	if err := json.Unmarshal(layerData, &desc); err != nil {
+	if err := json.Unmarshal(configData, &desc); err != nil {
 		return nil, err
 	}
 

@@ -1,6 +1,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"os"
@@ -11,7 +12,7 @@ import (
 	"github.com/phoban01/ocm-v2/api/v2/types"
 )
 
-func (r *repository) ReadBlob(path string) (io.ReadCloser, error) {
+func (r *repository) ReadBlob(_ context.Context, path string) (io.ReadCloser, error) {
 	return nil, nil
 }
 
